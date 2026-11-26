@@ -1,0 +1,18 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="260" viewBox="0 0 720 260">
+  <rect width="720" height="260" rx="12" fill="#0f1115" stroke="#242a36"/>
+  <text x="360" y="20" text-anchor="middle" fill="#9aa3b2" font-family="Inter" font-size="11" letter-spacing="0.6">MEMORY HIERARCHY — NUMBERS EVERY PROGRAMMER KNOWS</text>
+  <!-- row -->
+  <g font-family="Inter" font-size="11">
+    <rect x="40" y="40" width="110" height="70" rx="10" fill="#0b0e13" stroke="#6ee7b7"/><text x="95" y="65" text-anchor="middle" fill="#6ee7b7" font-weight="600">Registers</text><text x="95" y="82" text-anchor="middle" fill="#9aa3b2" font-size="10">~32 × 8B</text><text x="95" y="96" text-anchor="middle" fill="#e6e8eb" font-size="11">1 cycle</text>
+    <rect x="160" y="40" width="110" height="70" rx="10" fill="#171a21" stroke="#2e364a"/><text x="215" y="65" text-anchor="middle" fill="#e6e8eb" font-weight="600">L1 cache</text><text x="215" y="82" text-anchor="middle" fill="#9aa3b2" font-size="10">32KB, 64B line</text><text x="215" y="96" text-anchor="middle" fill="#e6e8eb">~4 cycles</text>
+    <rect x="280" y="40" width="110" height="70" rx="10" fill="#171a21" stroke="#2e364a"/><text x="335" y="65" text-anchor="middle" fill="#e6e8eb" font-weight="600">L2 / L3</text><text x="335" y="82" text-anchor="middle" fill="#9aa3b2" font-size="10">256KB / 8MB</text><text x="335" y="96" text-anchor="middle" fill="#e6e8eb">12–40c</text>
+    <rect x="400" y="40" width="130" height="70" rx="10" fill="#12151d" stroke="#60a5fa"/><text x="465" y="65" text-anchor="middle" fill="#60a5fa" font-weight="600">RAM (DRAM)</text><text x="465" y="82" text-anchor="middle" fill="#9aa3b2" font-size="10">16–64GB</text><text x="465" y="96" text-anchor="middle" fill="#e6e8eb">80 ns</text>
+    <rect x="540" y="40" width="140" height="70" rx="10" fill="#0b0e13" stroke="#9aa3b2"/><text x="610" y="65" text-anchor="middle" fill="#9aa3b2" font-weight="600">SSD / Disk</text><text x="610" y="82" text-anchor="middle" fill="#6b7383" font-size="10">512GB+</text><text x="610" y="96" text-anchor="middle" fill="#e6e8eb">50µs–10ms</text>
+  </g>
+  <text x="40" y="135" fill="#9aa3b2" font-size="11">Cache line 64B — false sharing killer. Page 4KiB — TLB caches translations. VM = illusion of contiguous RAM.</text>
+  <rect x="40" y="150" width="640" height="90" rx="10" fill="#171a21" stroke="#242a36"/>
+  <text x="60" y="172" fill="#e6e8eb" font-size="11" font-weight="600">Takeaway for SysProgs:</text>
+  <text x="60" y="190" fill="#9aa3b2" font-size="11">• Sequential stride 1 uses every byte of a 64B line — stride 64 wastes 63/64.</text>
+  <text x="60" y="208" fill="#9aa3b2" font-size="11">• TLB miss = page walk — random 4K jumps thrash TLB, sequential wins.</text>
+  <text x="60" y="226" fill="#6ee7b7" font-size="10">Bench: modules/01-machine-hardware/examples/04-cache-stride.c</text>
+</svg>

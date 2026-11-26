@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="200" viewBox="0 0 720 200">
+  <rect width="720" height="200" rx="12" fill="#0f1115" stroke="#242a36"/>
+  <text x="360" y="20" text-anchor="middle" fill="#9aa3b2" font-family="Inter" font-size="11">REGISTERS — YOUR FASTEST STORAGE</text>
+  <g font-family="JetBrains Mono, monospace" font-size="10">
+    <text x="40" y="45" fill="#6ee7b7" font-weight="600">x86-64 (16 GPR)</text>
+    <rect x="40" y="55" width="200" height="120" rx="8" fill="#171a21" stroke="#242a36"/>
+    <text x="50" y="75" fill="#e6e8eb">rax rbx rcx rdx rsi rdi rbp rsp</text>
+    <text x="50" y="92" fill="#e6e8eb">r8  r9  r10 r11 r12 r13 r14 r15</text>
+    <text x="50" y="110" fill="#9aa3b2" font-size="9">+ rip, rflags | xmm0-15, ymm</text>
+    <text x="50" y="130" fill="#6b7383" font-size="9">rax=sysno, rdi=arg1 …</text>
+    <text x="50" y="148" fill="#6b7383" font-size="9">syscall trap</text>
+    <text x="280" y="45" fill="#60a5fa" font-weight="600">AArch64 (31)</text>
+    <rect x="280" y="55" width="200" height="120" rx="8" fill="#171a21" stroke="#242a36"/>
+    <text x="290" y="75" fill="#e6e8eb">x0-x30, sp, xzr</text>
+    <text x="290" y="92" fill="#e6e8eb">x29=fp, x30=lr</text>
+    <text x="290" y="110" fill="#9aa3b2" font-size="9">v0-v31 (NEON)</text>
+    <text x="290" y="130" fill="#6b7383" font-size="9">x8=sysno, x0=arg1</text>
+    <text x="290" y="148" fill="#6b7383" font-size="9">svc #0</text>
+    <text x="520" y="45" fill="#e6e8eb" font-weight="600">RISC-V (32)</text>
+    <rect x="520" y="55" width="160" height="120" rx="8" fill="#171a21" stroke="#242a36"/>
+    <text x="530" y="75" fill="#e6e8eb">x0(zero)-x31</text>
+    <text x="530" y="92" fill="#e6e8eb">a0-a7, t0-t6, s0-s11</text>
+    <text x="530" y="110" fill="#9aa3b2" font-size="9">ra=x1, sp=x2</text>
+    <text x="530" y="130" fill="#6b7383" font-size="9">a7=sysno, a0=arg1</text>
+    <text x="530" y="148" fill="#6b7383" font-size="9">ecall</text>
+  </g>
+</svg>

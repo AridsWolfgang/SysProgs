@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="280" viewBox="0 0 720 280" data-interactive>
+  <rect width="720" height="280" rx="12" fill="#fdfcf8" stroke="#e8e0d0"/>
+  <text x="360" y="22" text-anchor="middle" fill="#0a0a0a" font-family="Inter,sans-serif" font-size="12" font-weight="700" letter-spacing="0.6">MEMORY HIERARCHY — Hover for latency, click for detail (Ctrl+wheel to zoom)</text>
+  <!-- Registers -->
+  <g data-tooltip="Registers: 1 cycle, ~32×8B, fastest — inside CPU" data-detail="Registers are 1-cycle, ~32×8B. Example: rax, x0, a0. Keep hot data here. Spill to stack costs.">
+    <rect x="30" y="40" width="120" height="80" rx="10" fill="#ffffff" stroke="#0a0a0a" stroke-width="1.5"/>
+    <text x="90" y="65" text-anchor="middle" fill="#0a0a0a" font-family="Inter" font-size="11" font-weight="600">Registers</text>
+    <text x="90" y="82" text-anchor="middle" fill="#6b6b6b" font-size="10">32 × 8B</text>
+    <text x="90" y="100" text-anchor="middle" fill="#0a0a0a" font-size="12" font-weight="700">1 cycle</text>
+  </g>
+  <!-- L1 -->
+  <g data-tooltip="L1: ~4 cycles, 32KB, 64B line — your working set" data-detail="L1 is 32KB, 64B lines, ~4 cycles. False sharing happens here: two threads, same line → ping-pong. Fix alignas(64).">
+    <rect x="160" y="40" width="120" height="80" rx="10" fill="#ffffff" stroke="#e8e0d0"/>
+    <text x="220" y="65" text-anchor="middle" fill="#0a0a0a" font-weight="600">L1 cache</text>
+    <text x="220" y="82" text-anchor="middle" fill="#6b6b6b" font-size="10">32KB, 64B</text>
+    <text x="220" y="100" text-anchor="middle" fill="#0a0a0a" font-weight="700">~4 cycles</text>
+  </g>
+  <!-- L2/L3 -->
+  <g data-tooltip="L2 256KB ~12c, L3 8MB ~40c — shared" data-detail="L2 256KB ~12c per core, L3 8MB ~40c shared. Prefetcher helps sequential, hurts random.">
+    <rect x="290" y="40" width="120" height="80" rx="10" fill="#ffffff" stroke="#e8e0d0"/>
+    <text x="350" y="65" text-anchor="middle" fill="#0a0a0a" font-weight="600">L2 / L3</text>
+    <text x="350" y="82" text-anchor="middle" fill="#6b6b6b" font-size="10">256KB / 8MB</text>
+    <text x="350" y="100" text-anchor="middle" fill="#0a0a0a" font-weight="700">12–40c</text>
+  </g>
+  <!-- RAM -->
+  <g data-tooltip="RAM: 80ns, 16–64GB, 4K pages, TLB caches translations" data-detail="RAM is 80ns, 16–64GB, 4K pages. TLB miss = 4 memory reads (page walk). Huge pages 2M reduce TLB pressure. Random 4K jumps thrash TLB.">
+    <rect x="420" y="40" width="140" height="80" rx="10" fill="#ffffff" stroke="#0a0a0a" stroke-width="1.2"/>
+    <text x="490" y="65" text-anchor="middle" fill="#0a0a0a" font-weight="600">RAM (DRAM)</text>
+    <text x="490" y="82" text-anchor="middle" fill="#6b6b6b" font-size="10">16–64GB, 4K page</text>
+    <text x="490" y="100" text-anchor="middle" fill="#0a0a0a" font-weight="700">80 ns</text>
+  </g>
+  <!-- SSD -->
+  <g data-tooltip="SSD: 50µs–10ms, 512GB+, via controller" data-detail="SSD is 50µs–10ms, 512GB+. Page cache (RAM) hides it: Kafka uses page cache + sendfile for zero-copy.">
+    <rect x="570" y="40" width="120" height="80" rx="10" fill="#fdfcf8" stroke="#e8e0d0"/>
+    <text x="630" y="65" text-anchor="middle" fill="#6b6b6b" font-weight="600">SSD / Disk</text>
+    <text x="630" y="82" text-anchor="middle" fill="#9a9a9a" font-size="10">512GB+</text>
+    <text x="630" y="100" text-anchor="middle" fill="#0a0a0a">50µs+</text>
+  </g>
+  <!-- Arrows -->
+  <line x1="150" y1="80" x2="160" y2="80" stroke="#0a0a0a" stroke-width="1.2"/><line x1="280" y1="80" x2="290" y2="80" stroke="#0a0a0a" stroke-width="1.2"/><line x1="410" y1="80" x2="420" y2="80" stroke="#0a0a0a" stroke-width="1.2"/><line x1="560" y1="80" x2="570" y2="80" stroke="#0a0a0a" stroke-width="1.2"/>
+  <!-- Bottom interactive hint -->
+  <rect x="30" y="140" width="660" height="120" rx="10" fill="#ffffff" stroke="#e8e0d0"/>
+  <text x="50" y="165" fill="#0a0a0a" font-size="11" font-weight="600">Try it:</text>
+  <text x="50" y="185" fill="#6b6b6b" font-size="11">• Hover any box → tooltip with latency/size</text>
+  <text x="50" y="202" fill="#6b6b6b" font-size="11">• Click a box → detail appears below (and highlights)</text>
+  <text x="50" y="219" fill="#6b6b6b" font-size="11">• Ctrl+wheel on SVG → zoom, drag to pan (browser)</text>
+  <text x="50" y="240" fill="#0a0a0a" font-size="10" font-weight="600">Lecture: sequential stride 1 uses 64B line fully — stride 64 wastes 63/64. Bench 04-cache-stride.c.</text>
+</svg>

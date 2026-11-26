@@ -1,0 +1,25 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="320" viewBox="0 0 720 320">
+  <rect width="720" height="320" rx="12" fill="#0f1115" stroke="#242a36"/>
+  <text x="360" y="20" text-anchor="middle" fill="#9aa3b2" font-family="Inter" font-size="11" letter-spacing="0.6">STACK FRAME — x86-64 CALL</text>
+  <!-- stack vertical -->
+  <g font-family="Inter" font-size="11">
+    <text x="40" y="50" fill="#6b7383">high addr</text><text x="40" y="285" fill="#6b7383">low addr — rsp</text>
+    <rect x="100" y="40" width="220" height="30" rx="6" fill="#171a21" stroke="#2e364a"/><text x="210" y="60" text-anchor="middle" fill="#9aa3b2">arg 7+ (stack spill)</text>
+    <rect x="100" y="70" width="220" height="28" rx="6" fill="#0b0e13" stroke="#fbbf24"/><text x="210" y="88" text-anchor="middle" fill="#fbbf24">return address</text><text x="330" y="88" fill="#6b7383" font-size="9">pushed by call</text>
+    <rect x="100" y="98" width="220" height="28" rx="6" fill="#12151d" stroke="#60a5fa"/><text x="210" y="116" text-anchor="middle" fill="#60a5fa">saved rbp</text><text x="330" y="116" fill="#6b7383" font-size="9">push rbp; mov rbp,rsp</text>
+    <rect x="100" y="126" width="220" height="60" rx="6" fill="#171a21" stroke="#2e364a"/><text x="210" y="145" text-anchor="middle" fill="#e6e8eb">locals</text><text x="210" y="162" text-anchor="middle" fill="#9aa3b2" font-size="10">sub rsp, N — your vars</text><text x="210" y="178" text-anchor="middle" fill="#6b7383" font-size="9">red zone 128B below rsp (SysV leaf)</text>
+    <rect x="100" y="186" width="220" height="30" rx="6" fill="#0b0e13" stroke="#242a36"/><text x="210" y="205" text-anchor="middle" fill="#9aa3b2">… free space …</text>
+  </g>
+  <!-- right notes -->
+  <rect x="360" y="40" width="320" height="245" rx="10" fill="#171a21" stroke="#242a36"/>
+  <text x="380" y="60" fill="#e6e8eb" font-size="11" font-weight="600">Calling conv (where args live)</text>
+  <text x="380" y="80" fill="#9aa3b2" font-size="11">SysV AMD64: rdi rsi rdx rcx r8 r9 + xmm0-7</text>
+  <text x="380" y="98" fill="#9aa3b2" font-size="11">Win64: rcx rdx r8 r9 + shadow 32B above ret</text>
+  <text x="380" y="116" fill="#9aa3b2" font-size="11">A64: x0-x7, RISC-V: a0-a7</text>
+  <text x="380" y="140" fill="#e6e8eb" font-size="11" font-weight="600">Callee vs caller saved</text>
+  <text x="380" y="158" fill="#9aa3b2" font-size="11">Callee: rbx rbp r12-r15 (must preserve)</text>
+  <text x="380" y="176" fill="#9aa3b2" font-size="11">Caller: rax rcx rdx rsi rdi r8-11 (can clobber)</text>
+  <text x="380" y="200" fill="#6ee7b7" font-size="10">Break it: clobber rbx without push/pop — crash.</text>
+  <text x="380" y="218" fill="#6ee7b7" font-size="10">See: gcc -S -O0 your.c → read spill for 7th arg.</text>
+  <text x="380" y="236" fill="#6ee7b7" font-size="10">Align: 16B before call — or fault on movaps.</text>
+</svg>

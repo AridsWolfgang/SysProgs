@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="720" height="200" viewBox="0 0 720 200">
+  <rect width="720" height="200" rx="12" fill="#0f1115" stroke="#242a36"/>
+  <text x="360" y="20" text-anchor="middle" fill="#9aa3b2" font-family="Inter" font-size="11">VIRTUAL MEMORY — PAGING</text>
+  <g font-family="Inter" font-size="11">
+    <rect x="40" y="35" width="140" height="80" rx="10" fill="#171a21" stroke="#60a5fa"/><text x="110" y="55" text-anchor="middle" fill="#60a5fa" font-weight="600">Virtual addr</text><text x="110" y="75" text-anchor="middle" fill="#e6e8eb" font-size="10">0x7fff1234</text><text x="110" y="92" fill="#9aa3b2" font-size="9">process illusion</text>
+    <text x="190" y="75" fill="#60a5fa">→ TLB</text>
+    <rect x="230" y="35" width="140" height="80" rx="10" fill="#12151d" stroke="#6ee7b7"/><text x="300" y="55" text-anchor="middle" fill="#6ee7b7" font-weight="600">Page table</text><text x="300" y="75" text-anchor="middle" fill="#e6e8eb" font-size="10">4K pages</text><text x="300" y="92" fill="#9aa3b2" font-size="9">VPN → PFN</text>
+    <text x="380" y="75" fill="#6ee7b7">→</text>
+    <rect x="400" y="35" width="140" height="80" rx="10" fill="#0b0e13" stroke="#e6e8eb"/><text x="470" y="55" text-anchor="middle" fill="#e6e8eb" font-weight="600">Physical RAM</text><text x="470" y="75" text-anchor="middle" fill="#9aa3b2" font-size="10">DRAM + cache</text>
+    <rect x="560" y="35" width="120" height="80" rx="10" fill="#171a21" stroke="#2e364a"/><text x="620" y="55" text-anchor="middle" fill="#9aa3b2" font-weight="600">Disk</text><text x="620" y="75" text-anchor="middle" fill="#6b7383" font-size="9">swap</text>
+  </g>
+  <text x="360" y="135" text-anchor="middle" fill="#9aa3b2" font-size="10">TLB miss = page walk (slow). Huge pages 2M reduce TLB pressure. Copy-on-write after fork.</text>
+  <text x="360" y="155" text-anchor="middle" fill="#6ee7b7" font-size="10">Allocator: bump → free-list → slab → jemalloc. Fragmentation = free holes.</text>
+  <text x="360" y="175" text-anchor="middle" fill="#fbbf24" font-size="9">False sharing: two threads, same 64B line → ping-pong. Fix alignas(64).</text>
+</svg>

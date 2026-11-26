@@ -1,0 +1,27 @@
+# Build outputs
+*.exe
+*.out
+*.o
+*.obj
+*.so
+*.dll
+*.a
+*.lib
+*.pdb
+build/
+out/
+target/
+zig-out/
+zig-cache/
+__pycache__/
+*.pyc
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+bench/results/
+playground/*.exe
+labs/*/*.exe
+*.log
+*.tmp

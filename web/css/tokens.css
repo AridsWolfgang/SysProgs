@@ -1,0 +1,56 @@
+/* SysProgs — Paper & Ink (white/black) — light paper default */
+:root{
+  --bg:#fdfcf8; /* paper */
+  --surface:#ffffff;
+  --surface-hover:#f5f2eb;
+  --card:#ffffff;
+  --card-hover:#fbfaf6;
+  --border:#e8e0d0; /* paper edge */
+  --border-strong:#d6cec0;
+  --border-focus:#0a0a0a;
+  --text:#0a0a0a; /* ink */
+  --text-strong:#000000;
+  --muted:#6b6b6b;
+  --faint:#9a9a9a;
+  --accent:#0a0a0a; /* ink accent */
+  --accent-strong:#000000;
+  --accent2:#0a0a0a;
+  --accent2-soft:rgba(10,10,10,.06);
+  --accent-soft:rgba(10,10,10,.04);
+  --warning:#8a6d00;
+  --danger:#8a1a1a;
+  --success:#0a5a3a;
+  --font-sans: Inter, ui-sans, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+  --text-xs:11px; --text-sm:13px; --text-base:15px; --text-lg:17px; --text-xl:22px; --text-2xl:28px;
+  --leading-tight:1.2; --leading-normal:1.65;
+  --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
+  --radius-sm:8px; --radius-md:10px; --radius-lg:14px; --radius-pill:999px;
+  --shadow-sm:0 1px 0 rgba(0,0,0,.06);
+  --shadow-md:0 4px 16px rgba(0,0,0,.08);
+  --shadow-lg:0 12px 40px rgba(0,0,0,.12);
+  --side:286px; --content-max:1180px; --toc:240px; --header-h:52px;
+}
+/* dark ink — optional toggle still works */
+[data-theme="dark"]{
+  --bg:#0a0a0a;
+  --surface:#111111;
+  --surface-hover:#161616;
+  --card:#161616;
+  --card-hover:#1c1c1c;
+  --border:#232323;
+  --border-strong:#2e2e2e;
+  --text:#fdfcf8;
+  --muted:#9a9a9a;
+  --faint:#6b6b6b;
+}
+/* paper texture subtle */
+body{
+  background:
+    radial-gradient(800px 400px at 50% -10%, rgba(0,0,0,.03), transparent 60%),
+    linear-gradient(0deg, rgba(0,0,0,.015) 1px, transparent 1px),
+    var(--bg);
+  background-size: auto, 100% 28px;
+}
+@media (prefers-reduced-motion: no-preference){ :root{ --ease:cubic-bezier(.2,.8,.2,1); --dur:.2s; } }
