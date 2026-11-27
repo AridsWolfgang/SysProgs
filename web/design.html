@@ -4,63 +4,87 @@
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>SysProgs — Design System</title>
+<meta name="theme-color" content="#0B1220"/>
 <link rel="stylesheet" href="./css/tokens.css"/>
 <link rel="stylesheet" href="./css/components.css"/>
 <link rel="stylesheet" href="./css/style.css"/>
 <style>
-.swatch{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);display:inline-block;vertical-align:middle;margin-right:8px}
-.grid2{display:grid;gap:12px}
-@media(min-width:700px){.grid2{grid-template-columns:repeat(2,1fr)}}
-.spec{font:11px var(--font-mono);color:var(--muted)}
+  .swatch{width:40px;height:40px;border-radius:8px;border:1px solid var(--border);display:inline-block;vertical-align:middle;margin-right:8px}
+  .grid2{display:grid;gap:12px}
+  @media(min-width:700px){.grid2{grid-template-columns:repeat(2,1fr)}}
+  .spec{font:11px var(--font-mono);color:var(--muted)}
+  .demo-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
 </style>
 </head>
 <body>
 <div class="app" style="grid-template-columns:1fr">
 <div class="main-wrap">
-<header class="topbar"><div class="brand"><span>Sys</span>Progs <b>DS</b></div><div class="crumbs">Design System — live guide</div><a class="btn small" href="./index.html">← Study</a></header>
-<div class="content-grid" style="grid-template-columns:1fr">
+<header class="topbar"><div class="brand"><span style="color:var(--text)">Sys</span><span style="color:var(--accent)">Progs</span> <b>DS</b></div><div class="crumbs">Design System — single source <code>tokens.css</code></div><div class="row"><button class="btn small" id="dsTheme">◐ Theme</button><a class="btn small" href="./index.html">← Study</a></div></header>
+<div class="content-grid" style="grid-template-columns:1fr; max-width:900px">
 <main class="main">
-<div class="card"><h2>Tokens</h2><p style="color:var(--muted)">Single source: <code>web/css/tokens.css</code>. Change token, whole app updates. No hard-coded values.</p></div>
 
-<div class="card"><h3>Color</h3>
-<div class="grid2">
-<div><span class="swatch" style="background:var(--bg)"></span> bg #0f1115 <span class="spec">--bg</span></div>
-<div><span class="swatch" style="background:var(--card)"></span> card #171a21 <span class="spec">--card</span></div>
-<div><span class="swatch" style="background:var(--border)"></span> border #242a36 <span class="spec">--border</span></div>
-<div><span class="swatch" style="background:var(--text)"></span> text #e6e8eb <span class="spec">--text (13.2:1)</span></div>
-<div><span class="swatch" style="background:var(--muted)"></span> muted #9aa3b2 <span class="spec">--muted (5.1:1)</span></div>
-<div><span class="swatch" style="background:var(--accent)"></span> accent #6ee7b7 <span class="spec">--accent</span></div>
-<div><span class="swatch" style="background:var(--accent2)"></span> accent2 #60a5fa <span class="spec">--accent2</span></div>
-<div><span class="swatch" style="background:var(--warning)"></span> warning #fbbf24 <span class="spec">--warning</span></div>
-</div></div>
+<div class="card">
+  <div class="eyebrow">Principles</div>
+  <h2 style="margin:6px 0 8px">Intentional, not decorative</h2>
+  <p>Content first. 68–76ch prose, 16px/1.7. One token file drives web + future mobile. No hard-coded colors. Dark-first (#0B1220), light equally considered (#F7F8FA). 4pt grid, 4.5:1 contrast, focus rings, reduced-motion.</p>
+  <div class="row"><span class="badge accent">content first</span><span class="badge">4pt grid</span><span class="badge info">a11y AA</span><span class="badge">no build</span></div>
+</div>
+
+<div class="card"><h3>Color — semantic tokens</h3>
+<p class="spec">Change <code>tokens.css</code> → whole app updates. Light is <code>[data-theme="light"]</code> override. Test both.</p>
+<div class="grid2" style="margin-top:12px">
+<div><span class="swatch" style="background:var(--bg)"></span> bg <code>var(--bg)</code> <span class="spec">0B1220 / F7F8FA</span></div>
+<div><span class="swatch" style="background:var(--surface)"></span> surface <span class="spec">--surface</span></div>
+<div><span class="swatch" style="background:var(--card)"></span> card <span class="spec">--card</span></div>
+<div><span class="swatch" style="background:var(--raised)"></span> raised <span class="spec">--raised</span></div>
+<div><span class="swatch" style="background:var(--border)"></span> border <span class="spec">--border</span></div>
+<div><span class="swatch" style="background:var(--text)"></span> text <span class="spec">--text (13:1)</span></div>
+<div><span class="swatch" style="background:var(--muted)"></span> muted <span class="spec">--muted (5.1:1)</span></div>
+<div><span class="swatch" style="background:var(--accent)"></span> accent #4F8CFF <span class="spec">--accent</span></div>
+<div><span class="swatch" style="background:var(--accent2)"></span> accent2 #22C7B8 <span class="spec">--accent2</span></div>
+<div><span class="swatch" style="background:var(--success)"></span> success <span class="spec">--success</span></div>
+<div><span class="swatch" style="background:var(--warning)"></span> warning <span class="spec">--warning</span></div>
+<div><span class="swatch" style="background:var(--danger)"></span> danger <span class="spec">--danger</span></div>
+</div>
+</div>
 
 <div class="card"><h3>Typography</h3>
-<p style="font:700 24px var(--font-sans)">Inter 24 Bold — Heading</p>
-<p style="font:600 20px var(--font-sans)">Inter 20 Semibold — Card title</p>
-<p style="font:400 15px/1.65 var(--font-sans)">Inter 15 Regular — Body: The quick brown fox. 65ch max, 1.65 leading.</p>
-<p style="font:400 13px/1.55 var(--font-mono)">JetBrains Mono 13 — Code: <code>write(1, "hi", 2)</code> + <code>mov rax, 1</code></p>
+<p style="font:700 28px var(--font-sans);letter-spacing:-.6px;margin:6px 0">Inter 28 Bold — Page title</p>
+<p style="font:700 22px var(--font-sans);margin:6px 0">Inter 22 Bold — Card title</p>
+<p style="font:400 16px/1.7 var(--font-sans);max-width:65ch;margin:6px 0">Inter 16 Regular — Body: The quick brown fox. 68ch max, 1.7 leading. Deep reading, not decoration.</p>
+<p style="font:400 13px/1.6 var(--font-mono)">JetBrains Mono 13 — Code: <code>write(1,"hi",2)</code> + <code>mov rax,1</code></p>
 </div>
 
-<div class="card"><h3>Space — 4pt grid</h3><div class="row"><span class="badge">4</span><span class="badge">8</span><span class="badge">12</span><span class="badge">16</span><span class="badge">24</span><span class="badge">32</span><span class="badge">48</span></div><p class="spec">Use var(--space-1)…12, not magic numbers. Card padding = --space-4 (16).</p></div>
+<div class="card"><h3>Space — 4pt grid</h3><div class="demo-row"><span class="badge">4</span><span class="badge">8</span><span class="badge">12</span><span class="badge">16</span><span class="badge">24</span><span class="badge">32</span><span class="badge">48</span></div><p class="spec" style="margin-top:8px">Use <code>var(--space-*)</code>. Card padding = <code>var(--space-4)</code> (16).</p></div>
 
-<div class="card"><h3>Components</h3>
-<h4>Buttons</h4><div class="row"><button class="btn">Default</button><button class="btn small">Small</button><button class="btn primary">Primary</button><button class="btn ghost">Ghost</button><button class="iconbtn">☰</button></div>
+<div class="card"><h3>Components — live</h3>
+<h4>Buttons</h4><div class="demo-row"><button class="btn">Default</button><button class="btn small">Small</button><button class="btn primary">Primary</button><button class="btn ghost">Ghost</button><button class="iconbtn">☰</button></div>
 <h4 style="margin-top:16px">Input</h4><input class="input" placeholder="Search modules… ( / )" style="max-width:320px"/>
-<h4 style="margin-top:16px">Badges</h4><div class="row"><span class="badge">00-orientation</span><span class="badge accent">core</span><span class="badge info">2–3h</span></div>
+<h4 style="margin-top:16px">Badges</h4><div class="demo-row"><span class="badge">00-orientation</span><span class="badge accent">core</span><span class="badge info">2–3h</span><span class="badge success">done</span></div>
 <h4 style="margin-top:16px">Progress</h4><div class="progress" style="max-width:320px"><i style="width:62%"></i></div>
-<h4 style="margin-top:16px">Card + Module</h4><div class="module" style="max-width:420px"><div style="font-size:11px;color:var(--muted)">Phase I — The Machine</div><h3 style="margin:4px 0">00 — Orientation</h3><div style="font-size:13px;color:var(--muted)">What is systems programming, toolchain.</div></div>
+<h4 style="margin-top:16px">Course card</h4><div class="course-card" style="max-width:420px"><div style="font:600 11px var(--font-mono);color:var(--faint)">PHASE I — THE MACHINE</div><h3 style="margin:4px 0">00 — Orientation</h3><p>What is systems programming, toolchain.</p><div class="row"><span class="badge">2–3h</span><span class="badge info">beginner</span></div></div>
+<h4 style="margin-top:16px">Callouts</h4><div class="lesson-callout" style="margin-top:8px"><strong>Note</strong><p style="margin:6px 0 0">Use semantic tones: note, tip, warning, important.</p></div><div class="lesson-callout tone-tip" style="margin-top:8px"><strong>Tip</strong><p style="margin:6px 0 0">Teal left border for tips.</p></div><div class="lesson-callout tone-warning" style="margin-top:8px"><strong>Warning</strong><p style="margin:6px 0 0">Amber for warnings.</p></div>
 <h4 style="margin-top:16px">Code</h4><pre><code class="language-c">// BUILD: gcc hello.c -o hello.exe
 #include &lt;stdio.h&gt;
-int main(){ printf("hi\\n"); }</code></pre>
+int main(){ printf("hi\n"); }</code></pre>
 </div>
 
-<div class="card"><h3>Layout</h3><p style="color:var(--muted)"><code>.app</code> grid <code>[286px] 1fr</code> → mobile drawer <code>translateX</code> + bottom nav. <code>.content-grid</code> <code>1fr 240px</code> (TOC). Max <code>1180px</code>, gutters <code>22px</code>.</p></div>
+<div class="card"><h3>Layout</h3><p class="spec"><code>.app</code> grid <code>[280px] 1fr</code> → mobile drawer + bottom nav. <code>.content-grid</code> <code>1fr 260px</code> (TOC). Content max <code>760px</code> readable, wide <code>1180px</code>. Header <code>56px</code> sticky with blur.</p></div>
 
-<div class="card"><h3>Rules</h3><ul style="color:var(--muted)"><li>New color → token in <code>tokens.css</code> + light variant, not hard-coded.</li><li>New spacing → <code>var(--space-*)</code>.</li><li>New component → <code>components.css</code> + demo here.</li><li>Check contrast ≥4.5:1, focus ring, reduced-motion.</li></ul></div>
+<div class="card"><h3>Rules</h3><ul style="color:var(--muted)"><li>New color → token in <code>tokens.css</code> + light variant, never hard-coded.</li><li>New spacing → <code>var(--space-*)</code>.</li><li>New component → <code>components.css</code> + demo here.</li><li>Check contrast ≥4.5:1, focus ring, reduced-motion, keyboard <span class="kbd">/</span>.</li><li>Lesson blocks typed: prose, callout, image, video, code, resource, quiz, lab — never markdown dump.</li></ul></div>
+
+<div class="card" style="border-style:dashed"><h3>Next steps</h3><p>This page is live. Change <code>tokens.css</code> and see every swatch/component update. The Study app at <a href="./index.html">index.html</a> uses the same tokens.</p></div>
 
 </main>
 </div>
 </div>
 </div>
+<script>
+  document.getElementById('dsTheme').onclick=()=>{
+    const html=document.documentElement;
+    const cur=html.getAttribute('data-theme');
+    if(cur==='light'){ html.removeAttribute('data-theme'); } else { html.setAttribute('data-theme','light'); }
+  };
+</script>
 </body>
 </html>

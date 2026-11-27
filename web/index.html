@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
-<title>SysProgs — Study</title>
-<meta name="theme-color" content="#0f1115"/>
+<title>SysProgs — Systems Programming</title>
+<meta name="theme-color" content="#0B1220"/>
+<meta name="description" content="From transistors to threads — learn systems programming properly. 16 modules, runnable examples, real projects."/>
 <link rel="manifest" href="./manifest.json"/>
 <link rel="stylesheet" href="./css/tokens.css"/>
 <link rel="stylesheet" href="./css/components.css"/>
@@ -12,62 +13,80 @@
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css"/>
 </head>
 <body>
-<div class="app">
-  <aside id="sidebar" class="sidebar">
+<div class="app" id="app">
+  <aside id="sidebar" class="sidebar" aria-label="Course outline">
     <div class="side-head">
-      <a href="#home" class="brand" style="display:flex;align-items:center;gap:8px;text-decoration:none">
+      <a href="#home" class="brand" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text)">
         <svg width="20" height="25" viewBox="0 0 240 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M180 240H60V120H180V240Z" fill="var(--accent)"/><path d="M180 60H60V240H180V60ZM240 300H0V0H240V300Z" fill="var(--text)"/></svg>
         <span><span style="color:var(--text)">Sys</span><span style="color:var(--accent)">Progs</span> <b>STUDY</b></span>
       </a>
-      <button id="closeSide" class="iconbtn">✕</button>
+      <button id="closeSide" class="iconbtn" aria-label="Close navigation">✕</button>
     </div>
-    <div class="side-search">
+
+    <div class="side-search" role="search">
       <div style="position:relative;flex:1">
-        <input id="q" placeholder="Search" autocomplete="off"/>
-        <button id="clearQ" class="hidden" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:var(--border);color:var(--muted);border-radius:999px;width:20px;height:20px;cursor:pointer;font-size:12px">✕</button>
+        <input id="q" placeholder="Search modules, lessons…" autocomplete="off" aria-label="Search"/>
+        <button id="clearQ" class="hidden" aria-label="Clear search" style="position:absolute;right:6px;top:50%;transform:translateY(-50%);border:none;background:var(--raised);color:var(--muted);border-radius:999px;width:20px;height:20px;cursor:pointer;font-size:12px;border:1px solid var(--border)">✕</button>
+      </div>
+      <div style="display:flex;gap:6px">
+        <span class="kbd" title="Press / to search">/</span><span style="font:11px var(--font-sans);color:var(--faint)">to search</span><span style="flex:1"></span><span id="searchMeta" class="side-meta"></span>
       </div>
     </div>
-    <div id="searchMeta" style="font:500 11px var(--font-mono);color:var(--faint);padding:0 2px"></div>
-    <nav id="sideNav" class="side-nav"></nav>
+
+    <nav id="sideNav" class="side-nav" aria-label="Modules"></nav>
+
     <div class="side-foot">
-      <div class="progress"><i id="progBar" style="width:0%"></i></div>
-      <small id="progText" style="color:var(--muted);font:11px var(--font-mono)">0 / 16</small>
-      <div class="row" style="margin-top:8px"><button class="btn small" id="themeBtn">◐ Theme</button><button class="btn small" id="installBtn" style="display:none">⤓ Install</button></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <span style="font:600 11px var(--font-sans);letter-spacing:.5px;color:var(--muted);text-transform:uppercase">Your progress</span>
+        <span id="progText" style="color:var(--muted);font:11px var(--font-mono)">0 / 16 • 0%</span>
+      </div>
+      <div class="progress" aria-hidden="true"><i id="progBar" style="width:0%"></i></div>
+      <div class="row" style="margin-top:10px">
+        <button class="btn small" id="themeBtn" aria-label="Toggle theme">◐ Theme</button>
+        <button class="btn small" id="installBtn" style="display:none">⤓ Install</button>
+        <a class="btn small ghost" href="./design.html" style="margin-left:auto">System →</a>
+      </div>
+      <div style="margin-top:10px;font:11px var(--font-sans);color:var(--faint);line-height:1.4">16 modules · 5 phases · 80h audit / 250h mastery. Start at 00 Orientation.</div>
     </div>
   </aside>
+
   <div class="main-wrap">
     <header class="topbar">
-      <button id="openSide" class="iconbtn">☰</button>
-      <a href="#home" aria-label="Home" style="display:flex;align-items:center;gap:8px;text-decoration:none"><svg width="20" height="25" viewBox="0 0 240 300" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M180 240H60V120H180V240Z" fill="var(--accent)"/><path d="M180 60H60V240H180V60ZM240 300H0V0H240V300Z" fill="var(--text)"/></svg><span class="brand" style="font-size:14px"><span style="color:var(--text)">Sys</span><span style="color:var(--accent)">Progs</span></span></a>
-      <nav class="topnav" aria-label="Primary" style="display:flex;gap:16px;margin-left:14px;font:500 13px var(--font-sans)">
-        <a href="#home">Learn</a>
-        <a href="#progress">Progress</a>
+      <button id="openSide" class="iconbtn" aria-label="Toggle navigation">☰</button>
+      <a href="#home" aria-label="Home" style="display:flex;align-items:center;gap:8px;text-decoration:none;color:var(--text)"><svg width="18" height="22" viewBox="0 0 240 300" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><path d="M180 240H60V120H180V240Z" fill="var(--accent)"/><path d="M180 60H60V240H180V60ZM240 300H0V0H240V300Z" fill="var(--text)"/></svg><span class="brand" style="font-size:14px"><span style="color:var(--text)">Sys</span><span style="color:var(--accent)">Progs</span></span></a>
+      <nav class="topnav" aria-label="Primary">
+        <a href="#home" data-nav="home">Learn</a>
+        <a href="#progress" data-nav="progress">Progress</a>
         <a href="./design.html">System</a>
-        <a href="./lesson.html">Lesson preview</a>
-        <a href="https://github.com/anomalyco/opencode" target="_blank" style="opacity:.7">GitHub ↗</a>
+        <a href="./lesson.html?id=syscall-boundary">Lesson</a>
       </nav>
-      <div class="crumbs" id="crumbs" style="flex:1;text-align:center">Learn / Overview</div>
-      <div class="top-actions" style="display:flex;gap:8px;align-items:center">
-        <code class="hidden" style="font:11px var(--font-mono);background:var(--surface);border:1px solid var(--border);padding:6px 8px;border-radius:8px">python -m http.server --directory web</code>
-        <button class="btn small" onclick="copyText('python -m http.server 8000 --directory web')">⎘ Copy</button>
+      <div class="crumbs" id="crumbs">Learn / Overview</div>
+      <div class="top-actions">
+        <button class="btn small ghost" onclick="document.getElementById('q').focus()" aria-label="Search">⌕</button>
       </div>
     </header>
+
     <div class="content-grid">
-      <main class="main">
+      <main class="main" id="main">
         <div id="view-home"></div>
         <div id="view-module" class="hidden"></div>
+        <div id="view-lesson" class="hidden"></div>
         <div id="view-progress" class="hidden"></div>
       </main>
-      <aside id="toc" class="toc hidden"></aside>
+      <aside id="toc" class="toc hidden" aria-label="On this page"></aside>
     </div>
   </div>
 </div>
-<nav class="nav mobile-only">
-  <button data-tab="home" class="active"><i>◧</i>Learn</button>
-  <button data-tab="module"><i>≡</i>Read</button>
-  <button data-tab="progress"><i>◎</i>Progress</button>
+
+<nav class="nav mobile-only" aria-label="Mobile navigation">
+  <button data-tab="home" class="active"><span style="font-size:16px">◧</span>Learn</button>
+  <button data-tab="module"><span style="font-size:16px">≡</span>Read</button>
+  <button data-tab="progress"><span style="font-size:16px">◎</span>Progress</button>
 </nav>
-<div id="overlay" class="overlay hidden"></div>
+
+<div id="overlay" class="overlay hidden" aria-hidden="true"></div>
+<div id="toast" aria-live="polite" style="position:fixed;bottom:76px;left:50%;transform:translateX(-50%);z-index:30;pointer-events:none"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-core.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script>

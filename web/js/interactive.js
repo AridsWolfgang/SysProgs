@@ -66,6 +66,7 @@
     });
   }
   document.addEventListener('DOMContentLoaded', scan);
+  document.addEventListener('interactive-scan', scan);
   // Also after dynamic content (marked render)
   const obs=new MutationObserver(scan);
   document.addEventListener('DOMContentLoaded', ()=> obs.observe(document.body,{childList:true,subtree:true}));

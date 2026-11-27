@@ -1,56 +1,107 @@
-/* SysProgs — Paper & Ink (white/black) — light paper default */
+/* SysProgs — Intentional Design Tokens
+   Single source of truth. Dark-first, light available.
+   All components use these vars — never hard-code colors/spacing. */
 :root{
-  --bg:#fdfcf8; /* paper */
-  --surface:#ffffff;
-  --surface-hover:#f5f2eb;
-  --card:#ffffff;
-  --card-hover:#fbfaf6;
-  --border:#e8e0d0; /* paper edge */
-  --border-strong:#d6cec0;
-  --border-focus:#0a0a0a;
-  --text:#0a0a0a; /* ink */
-  --text-strong:#000000;
-  --muted:#6b6b6b;
-  --faint:#9a9a9a;
-  --accent:#0a0a0a; /* ink accent */
-  --accent-strong:#000000;
-  --accent2:#0a0a0a;
-  --accent2-soft:rgba(10,10,10,.06);
-  --accent-soft:rgba(10,10,10,.04);
-  --warning:#8a6d00;
-  --danger:#8a1a1a;
-  --success:#0a5a3a;
-  --font-sans: Inter, ui-sans, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
-  --text-xs:11px; --text-sm:13px; --text-base:15px; --text-lg:17px; --text-xl:22px; --text-2xl:28px;
-  --leading-tight:1.2; --leading-normal:1.65;
+  /* Core — Dark (default) — from UI_UX_SYSTEM */
+  --bg:#0B1220;
+  --surface:#111C2E;
+  --surface-hover:#17243A;
+  --raised:#17243A;
+  --card:#111C2E;
+  --card-hover:#17243A;
+  --border:#26364D;
+  --border-strong:#334963;
+  --border-focus:#4F8CFF;
+  --text:#F3F6FC;
+  --text-strong:#FFFFFF;
+  --muted:#A7B4C8;
+  --faint:#7A8AA3;
+  --accent:#4F8CFF;        /* primary */
+  --accent-strong:#2F6BFF;
+  --accent-soft:rgba(79,140,255,.12);
+  --accent2:#22C7B8;       /* secondary / teal */
+  --accent2-soft:rgba(34,199,184,.14);
+  --accent2-strong:#18A99D;
+  --warning:#F3B64B;
+  --warning-soft:rgba(243,182,75,.14);
+  --danger:#F07178;
+  --danger-soft:rgba(240,113,120,.12);
+  --success:#35B779;
+  --success-soft:rgba(53,183,121,.14);
+
+  /* Typography */
+  --font-sans: Inter, ui-sans-system, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  --text-xs:11px; --text-sm:13px; --text-base:15px; --text-lg:17px; --text-xl:22px; --text-2xl:30px; --text-3xl:36px;
+  --leading-tight:1.2; --leading-normal:1.65; --leading-relaxed:1.78;
+  --tracking-tight:-0.35px;
   --weight-regular:400; --weight-medium:500; --weight-semibold:600; --weight-bold:700;
-  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px;
-  --radius-sm:8px; --radius-md:10px; --radius-lg:14px; --radius-pill:999px;
-  --shadow-sm:0 1px 0 rgba(0,0,0,.06);
-  --shadow-md:0 4px 16px rgba(0,0,0,.08);
-  --shadow-lg:0 12px 40px rgba(0,0,0,.12);
-  --side:286px; --content-max:1180px; --toc:240px; --header-h:52px;
+
+  /* Space — 4pt grid */
+  --space-1:4px; --space-2:8px; --space-3:12px; --space-4:16px; --space-6:24px; --space-8:32px; --space-10:40px; --space-12:48px;
+
+  /* Radii */
+  --radius-sm:8px; --radius-md:10px; --radius-lg:14px; --radius-xl:16px; --radius-pill:999px;
+
+  /* Shadows */
+  --shadow-sm:0 1px 0 rgba(0,0,0,.18), 0 1px 2px rgba(0,0,0,.18);
+  --shadow-md:0 8px 24px rgba(2,6,12,.24);
+  --shadow-lg:0 16px 40px rgba(2,6,12,.34);
+  --shadow-inset: inset 0 1px 0 rgba(255,255,255,.04);
+
+  /* Layout */
+  --side:280px; --content-max:760px; --content-wide:1180px; --toc:260px; --header-h:56px; --radius-card:14px;
+
+  /* Motion */
+  --ease:cubic-bezier(.2,.8,.2,1); --dur:.2s;
 }
-/* dark ink — optional toggle still works */
+
+/* Light theme — paper warmth + same semantics */
+[data-theme="light"]{
+  --bg:#F7F8FA;
+  --surface:#FFFFFF;
+  --surface-hover:#F0F3F7;
+  --raised:#F0F3F7;
+  --card:#FFFFFF;
+  --card-hover:#F7F8FA;
+  --border:#E0E6EE;
+  --border-strong:#C9D4E3;
+  --border-focus:#245FE5;
+  --text:#172033;
+  --text-strong:#0B1220;
+  --muted:#596579;
+  --faint:#8A97AC;
+  --accent:#245FE5;
+  --accent-strong:#1A49BE;
+  --accent-soft:rgba(36,95,229,.10);
+  --accent2:#087F79;
+  --accent2-soft:rgba(8,127,121,.10);
+  --accent2-strong:#066A66;
+  --shadow-sm:0 1px 0 rgba(16,24,40,.06);
+  --shadow-md:0 8px 24px rgba(16,24,40,.08);
+  --shadow-lg:0 16px 40px rgba(16,24,40,.12);
+}
+
+/* Explicit dark attribute for toggle logic */
 [data-theme="dark"]{
-  --bg:#0a0a0a;
-  --surface:#111111;
-  --surface-hover:#161616;
-  --card:#161616;
-  --card-hover:#1c1c1c;
-  --border:#232323;
-  --border-strong:#2e2e2e;
-  --text:#fdfcf8;
-  --muted:#9a9a9a;
-  --faint:#6b6b6b;
+  --bg:#0B1220; --surface:#111C2E; --raised:#17243A; --card:#111C2E; --card-hover:#17243A;
+  --border:#26364D; --border-strong:#334963; --text:#F3F6FC; --muted:#A7B4C8; --faint:#7A8AA3;
 }
-/* paper texture subtle */
+
+*{ scrollbar-color: var(--border-strong) transparent; }
+html{ scrollbar-gutter: stable; }
+
 body{
   background:
-    radial-gradient(800px 400px at 50% -10%, rgba(0,0,0,.03), transparent 60%),
-    linear-gradient(0deg, rgba(0,0,0,.015) 1px, transparent 1px),
+    radial-gradient(900px 420px at 50% -10%, rgba(79,140,255,.08), transparent 60%),
+    radial-gradient(600px 300px at 90% 0%, rgba(34,199,184,.06), transparent 60%),
     var(--bg);
-  background-size: auto, 100% 28px;
+  color:var(--text);
 }
-@media (prefers-reduced-motion: no-preference){ :root{ --ease:cubic-bezier(.2,.8,.2,1); --dur:.2s; } }
+
+@media (prefers-reduced-motion: no-preference){
+  :root{ --ease:cubic-bezier(.2,.8,.2,1); --dur:.2s; }
+}
+@media (prefers-reduced-motion: reduce){
+  *{ transition:none !important; animation:none !important; }
+}
