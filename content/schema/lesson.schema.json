@@ -1,0 +1,446 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://sysprogs.dev/schemas/lesson.schema.json",
+  "title": "SysProgs Lesson",
+  "description": "Structured lesson document used by the SysProgs content engine.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "id",
+    "title",
+    "course_id",
+    "module_id",
+    "order",
+    "difficulty",
+    "estimated_minutes",
+    "learning_objectives",
+    "blocks"
+  ],
+  "properties": {
+    "schema_version": {
+      "type": "string",
+      "const": "1.0"
+    },
+    "id": {
+      "type": "string",
+      "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 3
+    },
+    "subtitle": {
+      "type": "string"
+    },
+    "course_id": {
+      "type": "string"
+    },
+    "module_id": {
+      "type": "string"
+    },
+    "order": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "difficulty": {
+      "enum": [
+        "beginner",
+        "intermediate",
+        "advanced",
+        "expert"
+      ]
+    },
+    "estimated_minutes": {
+      "type": "integer",
+      "minimum": 1
+    },
+    "summary": {
+      "type": "string"
+    },
+    "learning_objectives": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 5
+      }
+    },
+    "prerequisites": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "tags": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocks": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "oneOf": [
+          {
+            "$ref": "#/$defs/prose"
+          },
+          {
+            "$ref": "#/$defs/heading"
+          },
+          {
+            "$ref": "#/$defs/callout"
+          },
+          {
+            "$ref": "#/$defs/image"
+          },
+          {
+            "$ref": "#/$defs/video"
+          },
+          {
+            "$ref": "#/$defs/code"
+          },
+          {
+            "$ref": "#/$defs/resource"
+          },
+          {
+            "$ref": "#/$defs/quiz"
+          },
+          {
+            "$ref": "#/$defs/lab"
+          }
+        ]
+      }
+    },
+    "assessment": {
+      "type": "object"
+    },
+    "next_lesson_id": {
+      "type": "string"
+    },
+    "review": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "enum": [
+            "draft",
+            "technical-review",
+            "approved",
+            "needs-update"
+          ]
+        },
+        "reviewed_on": {
+          "type": "string",
+          "format": "date"
+        },
+        "reviewer": {
+          "type": "string"
+        },
+        "sources_checked": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    }
+  },
+  "$defs": {
+    "prose": {
+      "type": "object",
+      "required": [
+        "type",
+        "markdown"
+      ],
+      "properties": {
+        "type": {
+          "const": "prose"
+        },
+        "markdown": {
+          "type": "string",
+          "minLength": 1
+        }
+      },
+      "additionalProperties": false
+    },
+    "heading": {
+      "type": "object",
+      "required": [
+        "type",
+        "level",
+        "text"
+      ],
+      "properties": {
+        "type": {
+          "const": "heading"
+        },
+        "level": {
+          "type": "integer",
+          "minimum": 2,
+          "maximum": 4
+        },
+        "text": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "callout": {
+      "type": "object",
+      "required": [
+        "type",
+        "tone",
+        "title",
+        "markdown"
+      ],
+      "properties": {
+        "type": {
+          "const": "callout"
+        },
+        "tone": {
+          "enum": [
+            "note",
+            "tip",
+            "important",
+            "warning"
+          ]
+        },
+        "title": {
+          "type": "string"
+        },
+        "markdown": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "image": {
+      "type": "object",
+      "required": [
+        "type",
+        "src",
+        "alt",
+        "caption"
+      ],
+      "properties": {
+        "type": {
+          "const": "image"
+        },
+        "src": {
+          "type": "string"
+        },
+        "alt": {
+          "type": "string",
+          "minLength": 5
+        },
+        "caption": {
+          "type": "string"
+        },
+        "attribution": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "video": {
+      "type": "object",
+      "required": [
+        "type",
+        "provider",
+        "video_id",
+        "title",
+        "creator",
+        "fallback_url"
+      ],
+      "properties": {
+        "type": {
+          "const": "video"
+        },
+        "provider": {
+          "enum": [
+            "youtube"
+          ]
+        },
+        "video_id": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "duration": {
+          "type": "string"
+        },
+        "start_seconds": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "fallback_url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "why_watch": {
+          "type": "string"
+        },
+        "captions_available": {
+          "type": "boolean"
+        }
+      },
+      "additionalProperties": false
+    },
+    "code": {
+      "type": "object",
+      "required": [
+        "type",
+        "language",
+        "source"
+      ],
+      "properties": {
+        "type": {
+          "const": "code"
+        },
+        "language": {
+          "type": "string"
+        },
+        "filename": {
+          "type": "string"
+        },
+        "source": {
+          "type": "string"
+        },
+        "explanation": {
+          "type": "string"
+        },
+        "expected_output": {
+          "type": "string"
+        },
+        "build_command": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "resource": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "publisher",
+        "url",
+        "purpose"
+      ],
+      "properties": {
+        "type": {
+          "const": "resource"
+        },
+        "title": {
+          "type": "string"
+        },
+        "publisher": {
+          "type": "string"
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "kind": {
+          "enum": [
+            "official-docs",
+            "article",
+            "book",
+            "reference",
+            "tool",
+            "paper"
+          ]
+        },
+        "purpose": {
+          "type": "string"
+        },
+        "accessed_on": {
+          "type": "string",
+          "format": "date"
+        }
+      },
+      "additionalProperties": false
+    },
+    "quiz": {
+      "type": "object",
+      "required": [
+        "type",
+        "question",
+        "options",
+        "correct_option",
+        "explanation"
+      ],
+      "properties": {
+        "type": {
+          "const": "quiz"
+        },
+        "question": {
+          "type": "string"
+        },
+        "options": {
+          "type": "array",
+          "minItems": 2,
+          "items": {
+            "type": "string"
+          }
+        },
+        "correct_option": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "explanation": {
+          "type": "string"
+        }
+      },
+      "additionalProperties": false
+    },
+    "lab": {
+      "type": "object",
+      "required": [
+        "type",
+        "title",
+        "objective",
+        "instructions",
+        "completion_criteria"
+      ],
+      "properties": {
+        "type": {
+          "const": "lab"
+        },
+        "title": {
+          "type": "string"
+        },
+        "objective": {
+          "type": "string"
+        },
+        "environment": {
+          "type": "string"
+        },
+        "instructions": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "starter_file": {
+          "type": "string"
+        },
+        "hints": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "completion_criteria": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    }
+  }
+}
