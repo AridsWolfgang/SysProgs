@@ -41,7 +41,7 @@
     },
     {
       "type": "image",
-      "src": "../../modules/00-orientation/assets/diagrams/00-syscall-layers.svg",
+      "src": "../modules/00-orientation/assets/diagrams/00-syscall-layers.svg",
       "alt": "Diagram showing an application calling a C library, which crosses the system-call boundary to the operating-system kernel.",
       "caption": "Conceptual path from application code through the C library to the kernel.",
       "attribution": "SysProgs original learning diagram"
@@ -55,7 +55,7 @@
       "type": "code",
       "language": "c",
       "filename": "library-vs-system-interface.c",
-      "source": "#include <stdio.h>\n#include <unistd.h>\n\nint main(void) {\n    printf(\"Hello from the C library\\n\");\n    write(STDOUT_FILENO, \"Hello from write\\n\", 18);\n    return 0;\n}\n",
+      "source": "#include <stdio.h>\n#include <unistd.h>\n\nint main(void) {\n    printf(\"Hello from the C library\\n\");\n    fflush(stdout);\n    write(STDOUT_FILENO, \"Hello from write\\n\", 17);\n    return 0;\n}\n",
       "explanation": "printf formats output through the C standard I/O library. write is a POSIX interface that requests writing bytes to a file descriptor. This example is POSIX-oriented and is not directly portable to every operating system. fflush ensures the stdio output is sent before the direct write call.",
       "build_command": "cc -Wall -Wextra -std=c11 library-vs-system-interface.c -o syscall-demo",
       "expected_output": "Hello from the C library\nHello from write\n"
