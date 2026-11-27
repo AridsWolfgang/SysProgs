@@ -56,7 +56,7 @@
       "language": "c",
       "filename": "library-vs-system-interface.c",
       "source": "#include <stdio.h>\n#include <unistd.h>\n\nint main(void) {\n    printf(\"Hello from the C library\\n\");\n    write(STDOUT_FILENO, \"Hello from write\\n\", 18);\n    return 0;\n}\n",
-      "explanation": "printf formats output through the C standard I/O library. write is a POSIX interface that requests writing bytes to a file descriptor. This example is POSIX-oriented and is not directly portable to every operating system. The explicit fflush makes the example's displayed output order deterministic for this demonstration.",
+      "explanation": "printf formats output through the C standard I/O library. write is a POSIX interface that requests writing bytes to a file descriptor. This example is POSIX-oriented and is not directly portable to every operating system. fflush ensures the stdio output is sent before the direct write call.",
       "build_command": "cc -Wall -Wextra -std=c11 library-vs-system-interface.c -o syscall-demo",
       "expected_output": "Hello from the C library\nHello from write\n"
     },
