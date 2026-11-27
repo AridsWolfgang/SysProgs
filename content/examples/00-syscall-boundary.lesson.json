@@ -1,0 +1,125 @@
+{
+  "schema_version": "1.0",
+  "id": "syscall-boundary",
+  "title": "From a C Library Call to a System Call",
+  "subtitle": "Understand what happens when a program asks the operating system to do work.",
+  "course_id": "systems-programming-foundations",
+  "module_id": "00-orientation",
+  "order": 1,
+  "difficulty": "beginner",
+  "estimated_minutes": 25,
+  "summary": "Trace the path from a familiar C output function to the operating-system interface beneath it.",
+  "learning_objectives": [
+    "Distinguish a C library function from a kernel system-call interface.",
+    "Explain the roles of user space, a C library and the kernel.",
+    "Describe why tracing tools may show a write system call when a program uses printf."
+  ],
+  "prerequisites": [
+    "Basic familiarity with compiling and running a C program"
+  ],
+  "tags": [
+    "systems-programming",
+    "operating-systems",
+    "syscalls",
+    "c"
+  ],
+  "blocks": [
+    {
+      "type": "callout",
+      "tone": "important",
+      "title": "The central idea",
+      "markdown": "A library function and a system call are not the same thing. A library function may prepare, buffer or transform work before invoking an operating-system interface."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The three layers"
+    },
+    {
+      "type": "prose",
+      "markdown": "A typical hosted C program runs in user space. It can call library functions such as `printf`. The C library may format text and buffer output. When data must be sent to a file descriptor, the library can invoke the operating system's write interface. The kernel performs the privileged operation."
+    },
+    {
+      "type": "image",
+      "src": "../modules/00-orientation/assets/diagrams/00-syscall-layers.svg",
+      "alt": "Diagram showing an application calling a C library, which crosses the system-call boundary to the operating-system kernel.",
+      "caption": "Conceptual path from application code through the C library to the kernel.",
+      "attribution": "SysProgs original learning diagram"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Compare two ways to write output"
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "library-vs-system-interface.c",
+      "source": "#include <stdio.h>\n#include <unistd.h>\n\nint main(void) {\n    printf(\"Hello from the C library\\n\");\n    fflush(stdout);\n    write(STDOUT_FILENO, \"Hello from write\\n\", 17);\n    return 0;\n}\n",
+      "explanation": "printf formats output through the C standard I/O library. write is a POSIX interface that requests writing bytes to a file descriptor. This example is POSIX-oriented and is not directly portable to every operating system. fflush ensures the stdio output is sent before the direct write call.",
+      "build_command": "cc -Wall -Wextra -std=c11 library-vs-system-interface.c -o syscall-demo",
+      "expected_output": "Hello from the C library\nHello from write\n"
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Output order and buffering",
+      "markdown": "The order in which output appears can depend on buffering and whether streams are connected to a terminal or redirected. For a reliable tracing exercise, flush stdout or run the calls separately and inspect the system-call trace."
+    },
+    {
+      "type": "resource",
+      "title": "write(2) — Linux manual page",
+      "publisher": "Linux man-pages project",
+      "url": "https://man7.org/linux/man-pages/man2/write.2.html",
+      "kind": "official-docs",
+      "purpose": "Read documented behaviour, return value and error conditions of the Linux write system call."
+    },
+    {
+      "type": "resource",
+      "title": "printf — The Open Group specification",
+      "publisher": "The Open Group",
+      "url": "https://pubs.opengroup.org/onlinepubs/9799919799/functions/printf.html",
+      "kind": "official-docs",
+      "purpose": "Compare the standard formatted-output function with the lower-level write interface."
+    },
+    {
+      "type": "quiz",
+      "question": "Why might a system-call tracing tool show write when a C program calls printf?",
+      "options": [
+        "printf is itself a kernel system call.",
+        "The C library can format and buffer output, then call the operating-system write interface.",
+        "The compiler always replaces printf with assembly.",
+        "The kernel executes all C library functions."
+      ],
+      "correct_option": 1,
+      "explanation": "printf is a C library function. The library may eventually use the operating-system write interface to send bytes to a file descriptor."
+    },
+    {
+      "type": "lab",
+      "title": "Observe the system-call boundary",
+      "objective": "Compile a small C program and observe the operating-system calls involved in its output.",
+      "environment": "Linux with a C compiler and strace. On macOS or Windows, use an appropriate platform tracing tool and adapt the commands.",
+      "instructions": [
+        "Compile the example with warnings enabled.",
+        "Run it normally and note the output.",
+        "Run it under strace, filtering for write-related calls.",
+        "Compare the observed calls with the source code.",
+        "Repeat with output redirected to a file and note any buffering differences."
+      ],
+      "hints": [
+        "Use strace -e trace=write ./syscall-demo on Linux.",
+        "If the trace is confusing, run the printf and write examples separately."
+      ],
+      "completion_criteria": [
+        "Identify printf as a library function.",
+        "Identify write as a POSIX interface that reaches the kernel.",
+        "Explain why buffering affects when a write is observed."
+      ]
+    }
+  ],
+  "next_lesson_id": "user-space-and-kernel-space",
+  "review": {
+    "status": "draft",
+    "sources_checked": true
+  }
+}
