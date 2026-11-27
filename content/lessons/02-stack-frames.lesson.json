@@ -1,0 +1,114 @@
+{
+  "schema_version": "1.0",
+  "id": "stack-frames-and-calls",
+  "title": "Stack Frames, Calls and ABIs",
+  "subtitle": "The universal shape that every language lowers to.",
+  "course_id": "systems-programming-foundations",
+  "module_id": "02-assembly",
+  "order": 1,
+  "difficulty": "intermediate",
+  "estimated_minutes": 40,
+  "summary": "Draw the x64 stack frame, learn SysV vs Win64 calling, and read objdump like prose.",
+  "learning_objectives": [
+    "Draw a stack frame (high→low, return address, saved rbp, locals, 16-byte align).",
+    "Map a C function call to push/call/mov/sub/ret and explain callee vs caller saved registers.",
+    "Distinguish SysV AMD64, Win64, AAPCS64 and RISC-V calling conventions and their pitfalls."
+  ],
+  "prerequisites": ["Endianness and Alignment", "Ability to run gcc -S and objdump"],
+  "tags": ["assembly", "abi", "x86-64", "stack"],
+  "blocks": [
+    {
+      "type": "callout",
+      "tone": "important",
+      "title": "One picture to memorize",
+      "markdown": "Every compiled language lowers calls to the same shape: caller pushes a return address, callee sets up a frame (`push rbp; mov rbp,rsp; sub rsp,N`), uses locals, tears down, and `ret` pops the address back. Get this picture and GDB backtraces stop being mysterious."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "What call really does"
+    },
+    {
+      "type": "prose",
+      "markdown": "`call foo` pushes `RIP` (8 bytes) so the CPU knows where to return, then jumps. Inside `foo`, `push rbp` saves the caller's frame pointer, `mov rbp,rsp` makes the new base, `sub rsp,16` reserves locals while keeping 16-byte alignment for the next `call`. The debugger walks `saved rbp` links to show a backtrace. Forgetting the 16-byte rule makes `movaps` in the callee fault with #GP — a classic hand-written-assembly bug.\n\nSysV leaf functions may use 128 bytes *below* `RSP` without adjusting `RSP` (red zone). Win64 requires 32 bytes of *shadow space* above the return address for the callee to spill registers — reserve it even if you don't use it."
+    },
+    {
+      "type": "image",
+      "src": "./assets/diagrams/02-stack-frame-interactive.svg",
+      "alt": "Interactive stack frame diagram showing high to low memory: arguments, return address, saved rbp, locals, alignment.",
+      "caption": "Interactive — hover each box for what call/push/sub does. Click for ABI detail. Ctrl+wheel to zoom.",
+      "attribution": "SysProgs original"
+    },
+    {
+      "type": "code",
+      "language": "asm",
+      "filename": "stack-frame.s",
+      "source": "; caller\ncall foo        ; push RIP (rsp-=8, [rsp]=ret), jmp foo\n; foo prologue\npush rbp\nmov  rbp, rsp\nsub  rsp, 16      ; locals, keep 16B align\nmov  [rbp-8], rdi ; spill arg\n; ... body ...\nadd  rsp, 16\npop  rbp\nret              ; pop RIP -> jmp back\n",
+      "explanation": "Annotated x64 prologue/epilogue. High address at top, RSP grows down. RBP is the debugger's bookmark."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Who saves what"
+    },
+    {
+      "type": "prose",
+      "markdown": "Calling conventions decide register ownership. SysV AMD64 callee must preserve `rbx, rbp, r12-r15`; Win64 preserves `rbx, rbp, rsi, rdi, r12-r15`; AAPCS64 preserves `x19-x28, SP`. Everything else is caller-clobbered. Clobbering a callee-saved register without restoring it corrupts the caller's data *after* the call returns — the bug appears one frame up, not inside the function you wrote."
+    },
+    {
+      "type": "image",
+      "src": "./assets/diagrams/02-calling-conv.svg",
+      "alt": "Table comparing SysV AMD64, Win64, AAPCS64 and RISC-V register arguments and preserved registers.",
+      "caption": "System V vs Win64 vs AAPCS64 vs RISC-V. rdi/rsi/rdx etc. map to x0-x7 / a0-a7.",
+      "attribution": "SysProgs original"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "filename": "inspect.sh",
+      "source": "cc -O0 -g add.c -c -o add.o\nobjdump -d add.o | less\ncc -O2 add.c -S -o add.s && cat add.s\n# try godbolt.org for ARM/RISC-V cross views\n",
+      "explanation": "Build with and without optimisation; compare how -O2 removes the frame or inlines. Use Compiler Explorer for A64 (aarch64-linux-gnu-gcc) and RV64.",
+      "build_command": "cc -O0 -g -c example.c -o example.o && objdump -d example.o | head -40"
+    },
+    {
+      "type": "resource",
+      "title": "System V AMD64 ABI (x86-64 psABI)",
+      "publisher": "x86-64.org",
+      "url": "https://gitlab.com/x86-psABIs/x86-64-ABI",
+      "kind": "reference",
+      "purpose": "Authoritative callee/caller saved, red zone, and argument registers."
+    },
+    {
+      "type": "resource",
+      "title": "x64 calling conventions — Win64 vs SysV",
+      "publisher": "MSDN and psABI docs",
+      "url": "https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention",
+      "kind": "official-docs",
+      "purpose": "Contrast shadow space and preserved registers."
+    },
+    {
+      "type": "quiz",
+      "question": "A leaf function under SysV uses [rsp-8] without sub rsp,8 and never calls another function. What allows this?",
+      "options": ["The compiler always pads stacks by 8.", "The 128-byte red zone below RSP that leaf functions may use without adjusting RSP.", "Win64 shadow space guarantees 32 bytes.", "GDB injects hidden padding."],
+      "correct_option": 1,
+      "explanation": "SysV defines a 128-byte red zone below RSP for leaf functions. Win64 has a different concept: 32-byte shadow space above the return address for spilling."
+    },
+    {
+      "type": "lab",
+      "title": "Read your own frame",
+      "objective": "Write a C function, compile to assembly and map every instruction to the frame picture.",
+      "environment": "gcc/clang, objdump or Compiler Explorer.",
+      "instructions": [
+        "Write int add(int a,int b){ return a+b; } and int main that calls it.",
+        "Compile with -O0 -g and -O2 separately, dump with gcc -S and objdump -d.",
+        "Annotate where arguments arrive (rdi/rsi on SysV) and where the return leaves (rax).",
+        "Introduce a local array char buf[16]; observe sub rsp alignment.",
+        "Break with gdb, run bt and info reg rbp/rsp."
+      ],
+      "hints": ["Try -fno-omit-frame-pointer vs -fomit-frame-pointer and compare backtraces."],
+      "completion_criteria": ["You can draw your add's frame with addresses and register values", "You state which registers are caller vs callee saved for your toolchain"]
+    }
+  ],
+  "next_lesson_id": "c-pointers-and-memory",
+  "review": { "status": "draft", "sources_checked": true }
+}

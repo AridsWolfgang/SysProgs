@@ -1,0 +1,94 @@
+{
+  "schema_version": "1.0",
+  "id": "memory-hierarchy",
+  "title": "Memory Hierarchy and Locality",
+  "subtitle": "Why sequential access wins and how 64 bytes shapes your code.",
+  "course_id": "systems-programming-foundations",
+  "module_id": "01-machine-hardware",
+  "order": 1,
+  "difficulty": "beginner",
+  "estimated_minutes": 35,
+  "summary": "Walk from registers to SSD, learn the 64-byte cache line, and measure why stride matters.",
+  "learning_objectives": [
+    "Describe the hierarchy from registers → L1 → L2 → L3 → RAM → SSD with latency intuition.",
+    "Explain the 64-byte cache line and why sequential access is faster per byte.",
+    "Predict cache-line and TLB effects and name fixes like alignas(64) and huge pages."
+  ],
+  "prerequisites": ["Basic C and ability to compile hello.c"],
+  "tags": ["hardware", "memory", "cache", "performance"],
+  "blocks": [
+    {
+      "type": "callout",
+      "tone": "important",
+      "title": "The key idea",
+      "markdown": "The CPU never sees RAM directly. It sees registers (1 cycle), then caches that hide RAM's ~80 ns latency. A line is **64 bytes** — fetch one byte and you fetch 63 neighbours. Algorithms that respect this win by 10×."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The layers"
+    },
+    {
+      "type": "prose",
+      "markdown": "Registers live on the core itself — tens of bytes, 1 cycle. L1 (32 KiB, ~4 cycles) and L2 (256 KiB, ~12 cycles) are per-core; L3 (8–32 MiB, ~40 cycles) is shared. Main memory is gigabytes at ~80 ns plus 4 KiB pages via the TLB. Storage (NVMe/SSD) is milliseconds-away by comparison. The Translation Lookaside Buffer caches virtual→physical page mappings; a TLB miss triggers a page walk (four memory reads on x64).\n\nPrograms that miss often do not wait for one miss — they wait for many. Good layout turns misses into hits."
+    },
+    {
+      "type": "image",
+      "src": "./assets/diagrams/01-memory-hierarchy-interactive.svg",
+      "alt": "Interactive diagram of the memory hierarchy from registers through L1, L2, L3, RAM with TLB and SSD.",
+      "caption": "Hover any box for latency/size. Click for detail. Ctrl+wheel to zoom — uses the same interactive helper as the Study app.",
+      "attribution": "SysProgs original"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Measure it"
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "cache-stride.c",
+      "source": "#include <stdio.h>\n#include <time.h>\n#define N (16*1024*1024)\nstatic int a[N];\nint main(void){\n  for(int i=0;i<N;i++) a[i]=i;\n  volatile long s=0;\n  clock_t t0=clock();\n  for(int it=0;it<4;it++) for(int i=0;i<N;i+=1) s+=a[i];\n  clock_t t1=clock();\n  for(int it=0;it<4;it++) for(int i=0;i<N;i+=16) s+=a[i];\n  clock_t t2=clock();\n  printf(\"seq %.3fs stride16 %.3fs s=%ld\\n\", (double)(t1-t0)/CLOCKS_PER_SEC, (double)(t2-t1)/CLOCKS_PER_SEC, s);\n  return 0;\n}\n",
+      "explanation": "Stride 1 touches every byte of each 64-byte line. Stride 16 (64 bytes) touches one int per line and wastes 60 bytes. Report time per element to see the per-line cost.",
+      "build_command": "cc -O2 cache-stride.c -o stride && ./stride",
+      "expected_output": "seq 0.04s stride16 0.02s — but per element stride 16 is slower after normalising by elements touched"
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Numbers are approximate",
+      "markdown": "L1 4c / RAM 80 ns / SSD 50 µs figures vary by chip and configuration. Use them as intuition, not datasheet. Measure on your machine with bench/cache-stride.c and note your own ratios."
+    },
+    {
+      "type": "resource",
+      "title": "What Every Programmer Should Know About Memory (Ulrich Drepper)",
+      "publisher": "Ulrich Drepper",
+      "url": "https://people.freebsd.org/~lstewart/articles/cpumemory.pdf",
+      "kind": "paper",
+      "purpose": "Deeper reference for caches, VM, TLB and NUMA. Skim section 2–3 for this lesson."
+    },
+    {
+      "type": "quiz",
+      "question": "Why is sequential array traversal usually faster per byte than strided traversal that skips 60 bytes each step?",
+      "options": ["The CPU has a special sequential instruction.", "Each miss fetches a 64-byte line; sequential touches every byte of the line, strided wastes most of it.", "Sequential uses fewer registers.", "Strided uses more power and throttles."],
+      "correct_option": 1,
+      "explanation": "A cache miss loads a full 64-byte line. Sequential uses the whole line before the next miss; strided loads a line for 4 bytes and discards 60."
+    },
+    {
+      "type": "lab",
+      "title": "See the line size yourself",
+      "objective": "Observe cache-line effects by varying stride and interpreting timing.",
+      "environment": "C compiler with -O2; any desktop OS.",
+      "instructions": [
+        "Compile and run cache-stride.c with -O2 and note both timings.",
+        "Divide each timing by number of elements visited to get per-element cost.",
+        "Change N to 1K and re-measure — does the advantage remain?",
+        "Look up your L1 size (32 KiB vs 48 KiB) and explain when the array stops fitting."
+      ],
+      "hints": ["Keep s volatile so the compiler does not optimise away the loop.", "Try stride 8 (32 bytes) vs 16 (64 bytes) vs 32 (128 bytes) and plot."],
+      "completion_criteria": ["You report seq vs strided per-element cost", "You explain why per-element cost rises at 64-byte stride", "You note where L1/L2 would fit the working set"]
+    }
+  ],
+  "next_lesson_id": "endian-and-alignment",
+  "review": { "status": "draft", "sources_checked": true }
+}

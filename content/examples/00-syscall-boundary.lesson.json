@@ -41,7 +41,7 @@
     },
     {
       "type": "image",
-      "src": "../modules/00-orientation/assets/diagrams/00-syscall-layers.svg",
+      "src": "./assets/diagrams/00-syscall-layers.svg",
       "alt": "Diagram showing an application calling a C library, which crosses the system-call boundary to the operating-system kernel.",
       "caption": "Conceptual path from application code through the C library to the kernel.",
       "attribution": "SysProgs original learning diagram"
@@ -117,7 +117,7 @@
       ]
     }
   ],
-  "next_lesson_id": "user-space-and-kernel-space",
+  "next_lesson_id": "toolchain-fundamentals",
   "review": {
     "status": "draft",
     "sources_checked": true

@@ -44,7 +44,7 @@
         },
         {
           "type": "image",
-          "src": "../modules/00-orientation/assets/diagrams/00-syscall-layers.svg",
+          "src": "./assets/diagrams/00-syscall-layers.svg",
           "alt": "Diagram showing an application calling a C library, which crosses the system-call boundary to the operating-system kernel.",
           "caption": "Conceptual path from application code through the C library to the kernel.",
           "attribution": "SysProgs original learning diagram"
@@ -120,7 +120,645 @@
           ]
         }
       ],
-      "next_lesson_id": "user-space-and-kernel-space",
+      "next_lesson_id": "toolchain-fundamentals",
+      "review": {
+        "status": "draft",
+        "sources_checked": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "toolchain-fundamentals",
+      "title": "Toolchain Fundamentals",
+      "subtitle": "Verify the tools that turn source text into running bytes.",
+      "course_id": "systems-programming-foundations",
+      "module_id": "00-orientation",
+      "order": 2,
+      "difficulty": "beginner",
+      "estimated_minutes": 30,
+      "summary": "Install and verify gcc, g++, nasm, gdb and python, and see exactly what each stage of compilation does.",
+      "learning_objectives": [
+        "Verify gcc, g++, nasm, gdb and python are available and explain what each does.",
+        "Distinguish preprocessing, compilation, assembly and linking using gcc flags.",
+        "Use objdump and nm to inspect a built binary and explain sections."
+      ],
+      "prerequisites": [
+        "From a C Library Call to a System Call"
+      ],
+      "tags": [
+        "toolchain",
+        "compilation",
+        "systems-programming",
+        "debugging"
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "tone": "important",
+          "title": "Why this matters",
+          "markdown": "You cannot debug what you cannot build. Every later module assumes you can go from `hello.c` → `a.exe` → `objdump` without guessing."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "The four stages"
+        },
+        {
+          "type": "prose",
+          "markdown": "A C program does not jump directly to machine code. `gcc -E` shows preprocessor output (headers expanded, macros applied). `gcc -S` emits assembly text. `as` assembles to an object file (`.o` with machine bytes plus relocations). `ld` links objects and libraries into an executable with resolved addresses.\n\nRun each flag once on the same `hello.c` — once you see the intermediate files, the pipeline stops being magic."
+        },
+        {
+          "type": "image",
+          "src": "./assets/diagrams/03-pipeline.svg",
+          "alt": "Diagram showing source file going through preprocessor, compiler, assembler and linker to executable.",
+          "caption": "The classical compilation pipeline. Each arrow is a gcc flag you can run yourself.",
+          "attribution": "SysProgs original — based on classical Unix toolchain"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Check your environment"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "filename": "check-toolchain.sh",
+          "source": "gcc --version\ng++ --version\nnasm -v\ngdb --version\npython --version\n",
+          "explanation": "Run each version check. On Windows with UCRT64 via MSYS2, gcc should report 12+; with the older mingw32 bundled, 6.3 is enough for modules 00-03 but upgrade for 04+.",
+          "build_command": "sh check-toolchain.sh",
+          "expected_output": "gcc (Rev...) 13.2.0\n..."
+        },
+        {
+          "type": "callout",
+          "tone": "tip",
+          "title": "Windows note",
+          "markdown": "Use UCRT64 (not mingw32) for C++ 17/20, newer GDB, and consistent POSIX shims. `pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb nasm python` keeps the whole curriculum working."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "See the stages"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "filename": "hello.c",
+          "source": "#include <stdio.h>\nint main(void){ printf(\"hi\\n\"); return 0; }\n",
+          "explanation": "Minimal hosted C program. It links against the C library by default; use -nostdlib later in assembly modules to avoid it.",
+          "build_command": "gcc -E hello.c -o hello.i && wc -l hello.i; gcc -S hello.c -o hello.s && head -20 hello.s; gcc -c hello.c -o hello.o && nm hello.o | head",
+          "expected_output": "hello.i has ~800 lines after headers; hello.s shows mov, call, ret; hello.o has T main"
+        },
+        {
+          "type": "resource",
+          "title": "GCC online documentation — Invoking GCC",
+          "publisher": "GNU Project",
+          "url": "https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html",
+          "kind": "official-docs",
+          "purpose": "Reference for -E, -S, -c and linking behaviour."
+        },
+        {
+          "type": "resource",
+          "title": "Binutils — objdump and nm",
+          "publisher": "GNU Project",
+          "url": "https://sourceware.org/binutils/docs/binutils/",
+          "kind": "official-docs",
+          "purpose": "Learn to inspect sections, symbols and disassembly of object files."
+        },
+        {
+          "type": "quiz",
+          "question": "What does gcc -S do without linking?",
+          "options": [
+            "Preprocesses only and stops.",
+            "Emits assembly text and stops.",
+            "Assembles to machine code object (.o) and stops.",
+            "Links into a final executable."
+          ],
+          "correct_option": 1,
+          "explanation": "-E stops after preprocessing, -S after compilation to assembly, -c after assembling to an object. Linking is the final ld step."
+        },
+        {
+          "type": "lab",
+          "title": "Trace the build",
+          "objective": "Produce and inspect all intermediate artefacts of a single C file.",
+          "environment": "Any OS with gcc, binutils (objdump/nm) and a text editor.",
+          "instructions": [
+            "Create hello.c as above.",
+            "Run gcc -E, -S, -c and a final link, keeping every output file.",
+            "Compare wc -l of hello.i before and after adding #include <stdio.h>.",
+            "Run objdump -d hello.o and find main's assembly.",
+            "Run nm hello.o and identify which symbol is global (T) vs undefined (U)."
+          ],
+          "hints": [
+            "Use gcc -v hello.c to see the sub-commands gcc actually invokes."
+          ],
+          "completion_criteria": [
+            "You have hello.i, hello.s, hello.o and hello.exe",
+            "You can explain which file each flag produced and why headers bloat hello.i"
+          ]
+        }
+      ],
+      "next_lesson_id": "memory-hierarchy",
+      "review": {
+        "status": "draft",
+        "sources_checked": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "memory-hierarchy",
+      "title": "Memory Hierarchy and Locality",
+      "subtitle": "Why sequential access wins and how 64 bytes shapes your code.",
+      "course_id": "systems-programming-foundations",
+      "module_id": "01-machine-hardware",
+      "order": 1,
+      "difficulty": "beginner",
+      "estimated_minutes": 35,
+      "summary": "Walk from registers to SSD, learn the 64-byte cache line, and measure why stride matters.",
+      "learning_objectives": [
+        "Describe the hierarchy from registers → L1 → L2 → L3 → RAM → SSD with latency intuition.",
+        "Explain the 64-byte cache line and why sequential access is faster per byte.",
+        "Predict cache-line and TLB effects and name fixes like alignas(64) and huge pages."
+      ],
+      "prerequisites": [
+        "Basic C and ability to compile hello.c"
+      ],
+      "tags": [
+        "hardware",
+        "memory",
+        "cache",
+        "performance"
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "tone": "important",
+          "title": "The key idea",
+          "markdown": "The CPU never sees RAM directly. It sees registers (1 cycle), then caches that hide RAM's ~80 ns latency. A line is **64 bytes** — fetch one byte and you fetch 63 neighbours. Algorithms that respect this win by 10×."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "The layers"
+        },
+        {
+          "type": "prose",
+          "markdown": "Registers live on the core itself — tens of bytes, 1 cycle. L1 (32 KiB, ~4 cycles) and L2 (256 KiB, ~12 cycles) are per-core; L3 (8–32 MiB, ~40 cycles) is shared. Main memory is gigabytes at ~80 ns plus 4 KiB pages via the TLB. Storage (NVMe/SSD) is milliseconds-away by comparison. The Translation Lookaside Buffer caches virtual→physical page mappings; a TLB miss triggers a page walk (four memory reads on x64).\n\nPrograms that miss often do not wait for one miss — they wait for many. Good layout turns misses into hits."
+        },
+        {
+          "type": "image",
+          "src": "./assets/diagrams/01-memory-hierarchy-interactive.svg",
+          "alt": "Interactive diagram of the memory hierarchy from registers through L1, L2, L3, RAM with TLB and SSD.",
+          "caption": "Hover any box for latency/size. Click for detail. Ctrl+wheel to zoom — uses the same interactive helper as the Study app.",
+          "attribution": "SysProgs original"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Measure it"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "filename": "cache-stride.c",
+          "source": "#include <stdio.h>\n#include <time.h>\n#define N (16*1024*1024)\nstatic int a[N];\nint main(void){\n  for(int i=0;i<N;i++) a[i]=i;\n  volatile long s=0;\n  clock_t t0=clock();\n  for(int it=0;it<4;it++) for(int i=0;i<N;i+=1) s+=a[i];\n  clock_t t1=clock();\n  for(int it=0;it<4;it++) for(int i=0;i<N;i+=16) s+=a[i];\n  clock_t t2=clock();\n  printf(\"seq %.3fs stride16 %.3fs s=%ld\\n\", (double)(t1-t0)/CLOCKS_PER_SEC, (double)(t2-t1)/CLOCKS_PER_SEC, s);\n  return 0;\n}\n",
+          "explanation": "Stride 1 touches every byte of each 64-byte line. Stride 16 (64 bytes) touches one int per line and wastes 60 bytes. Report time per element to see the per-line cost.",
+          "build_command": "cc -O2 cache-stride.c -o stride && ./stride",
+          "expected_output": "seq 0.04s stride16 0.02s — but per element stride 16 is slower after normalising by elements touched"
+        },
+        {
+          "type": "callout",
+          "tone": "warning",
+          "title": "Numbers are approximate",
+          "markdown": "L1 4c / RAM 80 ns / SSD 50 µs figures vary by chip and configuration. Use them as intuition, not datasheet. Measure on your machine with bench/cache-stride.c and note your own ratios."
+        },
+        {
+          "type": "resource",
+          "title": "What Every Programmer Should Know About Memory (Ulrich Drepper)",
+          "publisher": "Ulrich Drepper",
+          "url": "https://people.freebsd.org/~lstewart/articles/cpumemory.pdf",
+          "kind": "paper",
+          "purpose": "Deeper reference for caches, VM, TLB and NUMA. Skim section 2–3 for this lesson."
+        },
+        {
+          "type": "quiz",
+          "question": "Why is sequential array traversal usually faster per byte than strided traversal that skips 60 bytes each step?",
+          "options": [
+            "The CPU has a special sequential instruction.",
+            "Each miss fetches a 64-byte line; sequential touches every byte of the line, strided wastes most of it.",
+            "Sequential uses fewer registers.",
+            "Strided uses more power and throttles."
+          ],
+          "correct_option": 1,
+          "explanation": "A cache miss loads a full 64-byte line. Sequential uses the whole line before the next miss; strided loads a line for 4 bytes and discards 60."
+        },
+        {
+          "type": "lab",
+          "title": "See the line size yourself",
+          "objective": "Observe cache-line effects by varying stride and interpreting timing.",
+          "environment": "C compiler with -O2; any desktop OS.",
+          "instructions": [
+            "Compile and run cache-stride.c with -O2 and note both timings.",
+            "Divide each timing by number of elements visited to get per-element cost.",
+            "Change N to 1K and re-measure — does the advantage remain?",
+            "Look up your L1 size (32 KiB vs 48 KiB) and explain when the array stops fitting."
+          ],
+          "hints": [
+            "Keep s volatile so the compiler does not optimise away the loop.",
+            "Try stride 8 (32 bytes) vs 16 (64 bytes) vs 32 (128 bytes) and plot."
+          ],
+          "completion_criteria": [
+            "You report seq vs strided per-element cost",
+            "You explain why per-element cost rises at 64-byte stride",
+            "You note where L1/L2 would fit the working set"
+          ]
+        }
+      ],
+      "next_lesson_id": "endian-and-alignment",
+      "review": {
+        "status": "draft",
+        "sources_checked": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "endian-and-alignment",
+      "title": "Endianness and Alignment",
+      "subtitle": "How bytes sit in memory — and why struct {char; int;} is not 5 bytes.",
+      "course_id": "systems-programming-foundations",
+      "module_id": "01-machine-hardware",
+      "order": 2,
+      "difficulty": "beginner",
+      "estimated_minutes": 30,
+      "summary": "See little vs big endian, network order, and the padding rules that decide struct layout and size.",
+      "learning_objectives": [
+        "Predict memory byte order for a 32-bit integer on little vs big endian.",
+        "Use htonl/ntohl correctly and explain why networking needs it.",
+        "Explain why padding exists, compute sizeof and offsetof, and fix layout with reordering or alignas."
+      ],
+      "prerequisites": [
+        "Memory Hierarchy and Locality"
+      ],
+      "tags": [
+        "endianness",
+        "alignment",
+        "c",
+        "networking"
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "tone": "important",
+          "title": "Memory is just bytes",
+          "markdown": "A `uint32_t 0x01020304` is four bytes. The machine must pick an order to store them. Your laptop (x64, ARM default) picks little-endian: `04 03 02 01` in RAM. The network picks big-endian: `01 02 03 04` on the wire. Every `struct` is this idea plus alignment."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "See it with hex"
+        },
+        {
+          "type": "prose",
+          "markdown": "Write a 4-byte value, dump it with a hex tool or by casting to bytes. The order you see in RAM is the machine's endianness. The value as an integer is the same; the bytes in memory are reversed between the two conventions.\n\nNetworking code always converts with `htonl` / `ntohl` so peers agree. Skipping the call is the classic bug that works on one machine and fails on another."
+        },
+        {
+          "type": "image",
+          "src": "./assets/diagrams/01-endian.svg",
+          "alt": "Diagram showing 0x01020304 stored as 01 02 03 04 on big-endian and 04 03 02 01 on little-endian.",
+          "caption": "Same value, different byte order in memory. Network order is big-endian by definition.",
+          "attribution": "SysProgs original"
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "filename": "endian.c",
+          "source": "#include <stdio.h>\n#include <stdint.h>\nint main(void){\n  uint32_t v=0x01020304u;\n  unsigned char *p=(unsigned char*)&v;\n  printf(\"%02x %02x %02x %02x\\n\", p[0],p[1],p[2],p[3]);\n  // portable network order demo (Windows needs Winsock2, POSIX uses arpa/inet.h)\n  return 0;\n}\n",
+          "explanation": "Casts the integer's address to bytes and prints them. On little-endian you see 04 03 02 01; swap the bytes and print again to show the conversion.",
+          "build_command": "cc endian.c -o endian && ./endian",
+          "expected_output": "04 03 02 01 (little-endian); 01 02 03 04 after htonl"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Why struct size surprises you"
+        },
+        {
+          "type": "prose",
+          "markdown": "CPUs prefer aligned access: a 4-byte `int` wants address % 4 == 0, an 8-byte pointer wants % 8. The compiler inserts unnamed padding bytes so every member is aligned. `struct { char a; int b; }` has 1 byte for `a`, 3 bytes of padding, then 4 bytes for `b` → 8 bytes total. Put the big member first and you save the padding.\n\n`sizeof` includes padding. `offsetof` tells you where each member sits. `alignas` forces a stricter alignment (for example 64 to avoid false sharing on a cache line)."
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "filename": "padding.c",
+          "source": "#include <stdio.h>\n#include <stddef.h>\nstruct A{ char a; int b; };\nstruct B{ int b; char a; };\nint main(void){\n  printf(\"A %zu pad %zu offset b %zu\\n\", sizeof(struct A), sizeof(struct A)-sizeof(char)-sizeof(int), offsetof(struct A,b));\n  printf(\"B %zu\\n\", sizeof(struct B));\n  return 0;\n}\n",
+          "explanation": "Prints size, padding and offset. Swapping member order shows how layout affects size. Visualise with web/assets diagrams or your own drawings.",
+          "build_command": "cc padding.c -o padding && ./padding",
+          "expected_output": "A 8 ... B 8 (but packing differs; try char; char; int etc.)"
+        },
+        {
+          "type": "resource",
+          "title": "C language — offsetof and alignas",
+          "publisher": "cppreference.com",
+          "url": "https://en.cppreference.com/w/c/types/offsetof",
+          "kind": "reference",
+          "purpose": "Check padding, alignment and offsetof guarantees before trusting folklore."
+        },
+        {
+          "type": "quiz",
+          "question": "On a little-endian machine, struct {char a; int b;} with a=0x11, b=0x01020304 will most likely occupy how many bytes and what byte sequence starts the struct?",
+          "options": [
+            "5 bytes: 11 01 02 03 04",
+            "8 bytes: 11 00 00 00 04 03 02 01",
+            "8 bytes: 11 00 00 00 01 02 03 04",
+            "6 bytes: 11 04 03 02 01"
+          ],
+          "correct_option": 1,
+          "explanation": "Padding inserts 3 bytes after a so that b starts at an aligned offset. b itself is stored little-endian: 04 03 02 01."
+        },
+        {
+          "type": "lab",
+          "title": "Shrink a struct",
+          "objective": "Reorder members and measure sizeof / offsetof.",
+          "environment": "C compiler, any OS.",
+          "instructions": [
+            "Create struct D with members char, double, char, int.",
+            "Predict sizeof(D) before running.",
+            "Print sizeof and offsetof for each member.",
+            "Reorder members by descending alignment (double → int → char) and re-measure.",
+            "Try __attribute__((packed)) or #pragma pack(1) and reason why production code rarely uses them."
+          ],
+          "hints": [
+            "double wants 8-byte alignment; char wants 1. Sorting biggest first minimises holes."
+          ],
+          "completion_criteria": [
+            "You report original and reordered sizes with an explanation",
+            "You state where padding bytes sit"
+          ]
+        }
+      ],
+      "next_lesson_id": "stack-frames-and-calls",
+      "review": {
+        "status": "draft",
+        "sources_checked": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "stack-frames-and-calls",
+      "title": "Stack Frames, Calls and ABIs",
+      "subtitle": "The universal shape that every language lowers to.",
+      "course_id": "systems-programming-foundations",
+      "module_id": "02-assembly",
+      "order": 1,
+      "difficulty": "intermediate",
+      "estimated_minutes": 40,
+      "summary": "Draw the x64 stack frame, learn SysV vs Win64 calling, and read objdump like prose.",
+      "learning_objectives": [
+        "Draw a stack frame (high→low, return address, saved rbp, locals, 16-byte align).",
+        "Map a C function call to push/call/mov/sub/ret and explain callee vs caller saved registers.",
+        "Distinguish SysV AMD64, Win64, AAPCS64 and RISC-V calling conventions and their pitfalls."
+      ],
+      "prerequisites": [
+        "Endianness and Alignment",
+        "Ability to run gcc -S and objdump"
+      ],
+      "tags": [
+        "assembly",
+        "abi",
+        "x86-64",
+        "stack"
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "tone": "important",
+          "title": "One picture to memorize",
+          "markdown": "Every compiled language lowers calls to the same shape: caller pushes a return address, callee sets up a frame (`push rbp; mov rbp,rsp; sub rsp,N`), uses locals, tears down, and `ret` pops the address back. Get this picture and GDB backtraces stop being mysterious."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "What call really does"
+        },
+        {
+          "type": "prose",
+          "markdown": "`call foo` pushes `RIP` (8 bytes) so the CPU knows where to return, then jumps. Inside `foo`, `push rbp` saves the caller's frame pointer, `mov rbp,rsp` makes the new base, `sub rsp,16` reserves locals while keeping 16-byte alignment for the next `call`. The debugger walks `saved rbp` links to show a backtrace. Forgetting the 16-byte rule makes `movaps` in the callee fault with #GP — a classic hand-written-assembly bug.\n\nSysV leaf functions may use 128 bytes *below* `RSP` without adjusting `RSP` (red zone). Win64 requires 32 bytes of *shadow space* above the return address for the callee to spill registers — reserve it even if you don't use it."
+        },
+        {
+          "type": "image",
+          "src": "./assets/diagrams/02-stack-frame-interactive.svg",
+          "alt": "Interactive stack frame diagram showing high to low memory: arguments, return address, saved rbp, locals, alignment.",
+          "caption": "Interactive — hover each box for what call/push/sub does. Click for ABI detail. Ctrl+wheel to zoom.",
+          "attribution": "SysProgs original"
+        },
+        {
+          "type": "code",
+          "language": "asm",
+          "filename": "stack-frame.s",
+          "source": "; caller\ncall foo        ; push RIP (rsp-=8, [rsp]=ret), jmp foo\n; foo prologue\npush rbp\nmov  rbp, rsp\nsub  rsp, 16      ; locals, keep 16B align\nmov  [rbp-8], rdi ; spill arg\n; ... body ...\nadd  rsp, 16\npop  rbp\nret              ; pop RIP -> jmp back\n",
+          "explanation": "Annotated x64 prologue/epilogue. High address at top, RSP grows down. RBP is the debugger's bookmark."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Who saves what"
+        },
+        {
+          "type": "prose",
+          "markdown": "Calling conventions decide register ownership. SysV AMD64 callee must preserve `rbx, rbp, r12-r15`; Win64 preserves `rbx, rbp, rsi, rdi, r12-r15`; AAPCS64 preserves `x19-x28, SP`. Everything else is caller-clobbered. Clobbering a callee-saved register without restoring it corrupts the caller's data *after* the call returns — the bug appears one frame up, not inside the function you wrote."
+        },
+        {
+          "type": "image",
+          "src": "./assets/diagrams/02-calling-conv.svg",
+          "alt": "Table comparing SysV AMD64, Win64, AAPCS64 and RISC-V register arguments and preserved registers.",
+          "caption": "System V vs Win64 vs AAPCS64 vs RISC-V. rdi/rsi/rdx etc. map to x0-x7 / a0-a7.",
+          "attribution": "SysProgs original"
+        },
+        {
+          "type": "code",
+          "language": "bash",
+          "filename": "inspect.sh",
+          "source": "cc -O0 -g add.c -c -o add.o\nobjdump -d add.o | less\ncc -O2 add.c -S -o add.s && cat add.s\n# try godbolt.org for ARM/RISC-V cross views\n",
+          "explanation": "Build with and without optimisation; compare how -O2 removes the frame or inlines. Use Compiler Explorer for A64 (aarch64-linux-gnu-gcc) and RV64.",
+          "build_command": "cc -O0 -g -c example.c -o example.o && objdump -d example.o | head -40"
+        },
+        {
+          "type": "resource",
+          "title": "System V AMD64 ABI (x86-64 psABI)",
+          "publisher": "x86-64.org",
+          "url": "https://gitlab.com/x86-psABIs/x86-64-ABI",
+          "kind": "reference",
+          "purpose": "Authoritative callee/caller saved, red zone, and argument registers."
+        },
+        {
+          "type": "resource",
+          "title": "x64 calling conventions — Win64 vs SysV",
+          "publisher": "MSDN and psABI docs",
+          "url": "https://learn.microsoft.com/en-us/cpp/build/x64-calling-convention",
+          "kind": "official-docs",
+          "purpose": "Contrast shadow space and preserved registers."
+        },
+        {
+          "type": "quiz",
+          "question": "A leaf function under SysV uses [rsp-8] without sub rsp,8 and never calls another function. What allows this?",
+          "options": [
+            "The compiler always pads stacks by 8.",
+            "The 128-byte red zone below RSP that leaf functions may use without adjusting RSP.",
+            "Win64 shadow space guarantees 32 bytes.",
+            "GDB injects hidden padding."
+          ],
+          "correct_option": 1,
+          "explanation": "SysV defines a 128-byte red zone below RSP for leaf functions. Win64 has a different concept: 32-byte shadow space above the return address for spilling."
+        },
+        {
+          "type": "lab",
+          "title": "Read your own frame",
+          "objective": "Write a C function, compile to assembly and map every instruction to the frame picture.",
+          "environment": "gcc/clang, objdump or Compiler Explorer.",
+          "instructions": [
+            "Write int add(int a,int b){ return a+b; } and int main that calls it.",
+            "Compile with -O0 -g and -O2 separately, dump with gcc -S and objdump -d.",
+            "Annotate where arguments arrive (rdi/rsi on SysV) and where the return leaves (rax).",
+            "Introduce a local array char buf[16]; observe sub rsp alignment.",
+            "Break with gdb, run bt and info reg rbp/rsp."
+          ],
+          "hints": [
+            "Try -fno-omit-frame-pointer vs -fomit-frame-pointer and compare backtraces."
+          ],
+          "completion_criteria": [
+            "You can draw your add's frame with addresses and register values",
+            "You state which registers are caller vs callee saved for your toolchain"
+          ]
+        }
+      ],
+      "next_lesson_id": "c-pointers-and-memory",
+      "review": {
+        "status": "draft",
+        "sources_checked": true
+      }
+    },
+    {
+      "schema_version": "1.0",
+      "id": "c-pointers-and-memory",
+      "title": "Pointers, Arrays and Memory Lifetime",
+      "subtitle": "Make decay, lifetime and ownership visible — before you allocate.",
+      "course_id": "systems-programming-foundations",
+      "module_id": "03-c",
+      "order": 1,
+      "difficulty": "intermediate",
+      "estimated_minutes": 35,
+      "summary": "Distinguish arrays vs pointers, stack vs heap, and manage allocation with a disciplined mental model.",
+      "learning_objectives": [
+        "Explain array decay and why sizeof(arr) differs in caller vs callee.",
+        "Describe stack, static and heap lifetime and when each is appropriate.",
+        "Implement and reason about malloc/free discipline without leaks or use-after-free."
+      ],
+      "prerequisites": [
+        "Stack Frames, Calls and ABIs"
+      ],
+      "tags": [
+        "c",
+        "pointers",
+        "memory",
+        "allocation"
+      ],
+      "blocks": [
+        {
+          "type": "callout",
+          "tone": "important",
+          "title": "C's sharp edge",
+          "markdown": "In C, you manage every byte's lifetime. The compiler will not free for you, will not bounds-check, and will not warn about every use-after-free. The mental model — decay, lifetime, ownership — must be yours."
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Array vs pointer"
+        },
+        {
+          "type": "prose",
+          "markdown": "`int a[4]` is four ints laid out contiguously. `sizeof(a)` is the whole array (16 bytes on most platforms). When you pass `a` to a function, it *decays* to `int*` — a pointer to the first element — and `sizeof` inside the callee now measures the pointer (8 bytes). `a[2]` is just `*(a+2)`. `char *s` may point to read-only literal storage; `char s[]` makes a writable copy on the stack. Confusing these is the most common C beginner bug after off-by-one."
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "filename": "decay.c",
+          "source": "#include <stdio.h>\nvoid f(int a[4]){ printf(\"in f: %zu\\n\", sizeof(a)); /* really int* */ }\nint main(void){\n  int a[4]={1,2,3,4};\n  printf(\"in main: %zu vs pointer %zu\\n\", sizeof(a), sizeof(&a[0]));\n  f(a);\n  char *lit=\"hi\"; char arr[]=\"hi\";\n  printf(\"lit pointer %zu arr bytes %zu\\n\", sizeof(lit), sizeof(arr));\n  return 0;\n}\n",
+          "explanation": "Prints sizes to show decay. Also shows literal vs array storage.",
+          "build_command": "cc -Wall -Wextra decay.c -o decay && ./decay",
+          "expected_output": "in main: 16 vs pointer 8\\nin f: 8\\nlit pointer 8 arr bytes 3"
+        },
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Lifetime: stack, static, heap"
+        },
+        {
+          "type": "prose",
+          "markdown": "Stack holds automatic locals and call frames — fast, limited (commonly 1–8 MiB), gone on return. Static storage (globals, `static` locals) lives for the whole run. Heap (via `malloc`/`free`) persists until you free it — you decide, you fail. `mmap` / `VirtualAlloc` is the underlying page-level primitive; `malloc` layers bins, free lists and coalescing on top of it. A bump allocator is 40 lines: a pointer that only grows; freeing is a reset."
+        },
+        {
+          "type": "code",
+          "language": "c",
+          "filename": "bump-alloc.c",
+          "source": "#include <stddef.h>\n#include <stdint.h>\nstatic uint8_t heap[1<<20];\nstatic size_t off=0;\nvoid* bump_alloc(size_t n){\n  size_t aligned=(n+7)&~(size_t)7;\n  if(off+aligned> sizeof(heap)) return 0;\n  void *p=&heap[off]; off+=aligned; return p;\n}\nvoid bump_reset(void){ off=0; }\n// use: int *v=bump_alloc(100*sizeof(int)); ... bump_reset();\n",
+          "explanation": "Archetypal arena allocator. No free of individual blocks, only reset. Real malloc adds free lists, reuse and coalescing — see modules/03-c/memory.",
+          "build_command": "cc -Wall -Wextra -c bump-alloc.c"
+        },
+        {
+          "type": "callout",
+          "tone": "warning",
+          "title": "Ownership, not syntax",
+          "markdown": "Decide at every allocation: who owns this pointer, when does it die, what happens on failure (`malloc` returns NULL). Write the free *before* the logic, or use a single exit path. Leaks and double-frees are ownership failures, not typos."
+        },
+        {
+          "type": "resource",
+          "title": "C11 Standard — Memory and object lifetime (draft)",
+          "publisher": "ISO/IEC 9899",
+          "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+          "kind": "official-docs",
+          "purpose": "First-class reference for lifetime, sizeof and pointer semantics."
+        },
+        {
+          "type": "resource",
+          "title": "AddressSanitizer and the sanitizers",
+          "publisher": "Google / Clang documentation",
+          "url": "https://github.com/google/sanitizers/wiki/AddressSanitizer",
+          "kind": "tool",
+          "purpose": "Detect leaks, use-after-free and overflows at runtime — use ASan while you learn, not after."
+        },
+        {
+          "type": "quiz",
+          "question": "Why does sizeof(a) differ inside main vs inside f(int a[4])?",
+          "options": [
+            "The compiler optimises main differently.",
+            "Arrays decay to pointers when passed; sizeof in f measures a pointer.",
+            "a is copied by value and shrinks.",
+            "sizeof is implementation-defined and random."
+          ],
+          "correct_option": 1,
+          "explanation": "Formal parameters declared as a[4] adjust to int*. sizeof of a pointer (8 on 64-bit) is not the size of the original array."
+        },
+        {
+          "type": "lab",
+          "title": "Find the leak before ASan does",
+          "objective": "Write a heap routine with deliberate unsafety, then fix it and prove it with sanitizers.",
+          "environment": "gcc or clang, any OS; -fsanitize=address for the check.",
+          "instructions": [
+            "Write a function char* make_greeting(const char* name) that mallocs, sprintfs and returns.",
+            "Call it in a loop 1000 times without free — observe growth with top / Task Manager.",
+            "Run with cc -fsanitize=address -g and read the report when you free incorrectly or use-after-free.",
+            "Fix: free after every call and set pointer to NULL after freeing.",
+            "Port the 40-line bump allocator to a free-list allocator sketch and keep ownership notes."
+          ],
+          "hints": [
+            "ASan + UBSan together: -fsanitize=address,undefined. LeakSanitizer runs at exit."
+          ],
+          "completion_criteria": [
+            "You can run under ASan with zero reports",
+            "You can describe each pointer's lifetime in one sentence"
+          ]
+        }
+      ],
+      "next_lesson_id": null,
       "review": {
         "status": "draft",
         "sources_checked": true

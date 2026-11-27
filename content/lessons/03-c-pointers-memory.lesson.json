@@ -1,0 +1,108 @@
+{
+  "schema_version": "1.0",
+  "id": "c-pointers-and-memory",
+  "title": "Pointers, Arrays and Memory Lifetime",
+  "subtitle": "Make decay, lifetime and ownership visible — before you allocate.",
+  "course_id": "systems-programming-foundations",
+  "module_id": "03-c",
+  "order": 1,
+  "difficulty": "intermediate",
+  "estimated_minutes": 35,
+  "summary": "Distinguish arrays vs pointers, stack vs heap, and manage allocation with a disciplined mental model.",
+  "learning_objectives": [
+    "Explain array decay and why sizeof(arr) differs in caller vs callee.",
+    "Describe stack, static and heap lifetime and when each is appropriate.",
+    "Implement and reason about malloc/free discipline without leaks or use-after-free."
+  ],
+  "prerequisites": ["Stack Frames, Calls and ABIs"],
+  "tags": ["c", "pointers", "memory", "allocation"],
+  "blocks": [
+    {
+      "type": "callout",
+      "tone": "important",
+      "title": "C's sharp edge",
+      "markdown": "In C, you manage every byte's lifetime. The compiler will not free for you, will not bounds-check, and will not warn about every use-after-free. The mental model — decay, lifetime, ownership — must be yours."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Array vs pointer"
+    },
+    {
+      "type": "prose",
+      "markdown": "`int a[4]` is four ints laid out contiguously. `sizeof(a)` is the whole array (16 bytes on most platforms). When you pass `a` to a function, it *decays* to `int*` — a pointer to the first element — and `sizeof` inside the callee now measures the pointer (8 bytes). `a[2]` is just `*(a+2)`. `char *s` may point to read-only literal storage; `char s[]` makes a writable copy on the stack. Confusing these is the most common C beginner bug after off-by-one."
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "decay.c",
+      "source": "#include <stdio.h>\nvoid f(int a[4]){ printf(\"in f: %zu\\n\", sizeof(a)); /* really int* */ }\nint main(void){\n  int a[4]={1,2,3,4};\n  printf(\"in main: %zu vs pointer %zu\\n\", sizeof(a), sizeof(&a[0]));\n  f(a);\n  char *lit=\"hi\"; char arr[]=\"hi\";\n  printf(\"lit pointer %zu arr bytes %zu\\n\", sizeof(lit), sizeof(arr));\n  return 0;\n}\n",
+      "explanation": "Prints sizes to show decay. Also shows literal vs array storage.",
+      "build_command": "cc -Wall -Wextra decay.c -o decay && ./decay",
+      "expected_output": "in main: 16 vs pointer 8\\nin f: 8\\nlit pointer 8 arr bytes 3"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Lifetime: stack, static, heap"
+    },
+    {
+      "type": "prose",
+      "markdown": "Stack holds automatic locals and call frames — fast, limited (commonly 1–8 MiB), gone on return. Static storage (globals, `static` locals) lives for the whole run. Heap (via `malloc`/`free`) persists until you free it — you decide, you fail. `mmap` / `VirtualAlloc` is the underlying page-level primitive; `malloc` layers bins, free lists and coalescing on top of it. A bump allocator is 40 lines: a pointer that only grows; freeing is a reset."
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "bump-alloc.c",
+      "source": "#include <stddef.h>\n#include <stdint.h>\nstatic uint8_t heap[1<<20];\nstatic size_t off=0;\nvoid* bump_alloc(size_t n){\n  size_t aligned=(n+7)&~(size_t)7;\n  if(off+aligned> sizeof(heap)) return 0;\n  void *p=&heap[off]; off+=aligned; return p;\n}\nvoid bump_reset(void){ off=0; }\n// use: int *v=bump_alloc(100*sizeof(int)); ... bump_reset();\n",
+      "explanation": "Archetypal arena allocator. No free of individual blocks, only reset. Real malloc adds free lists, reuse and coalescing — see modules/03-c/memory.",
+      "build_command": "cc -Wall -Wextra -c bump-alloc.c"
+    },
+    {
+      "type": "callout",
+      "tone": "warning",
+      "title": "Ownership, not syntax",
+      "markdown": "Decide at every allocation: who owns this pointer, when does it die, what happens on failure (`malloc` returns NULL). Write the free *before* the logic, or use a single exit path. Leaks and double-frees are ownership failures, not typos."
+    },
+    {
+      "type": "resource",
+      "title": "C11 Standard — Memory and object lifetime (draft)",
+      "publisher": "ISO/IEC 9899",
+      "url": "https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf",
+      "kind": "official-docs",
+      "purpose": "First-class reference for lifetime, sizeof and pointer semantics."
+    },
+    {
+      "type": "resource",
+      "title": "AddressSanitizer and the sanitizers",
+      "publisher": "Google / Clang documentation",
+      "url": "https://github.com/google/sanitizers/wiki/AddressSanitizer",
+      "kind": "tool",
+      "purpose": "Detect leaks, use-after-free and overflows at runtime — use ASan while you learn, not after."
+    },
+    {
+      "type": "quiz",
+      "question": "Why does sizeof(a) differ inside main vs inside f(int a[4])?",
+      "options": ["The compiler optimises main differently.", "Arrays decay to pointers when passed; sizeof in f measures a pointer.", "a is copied by value and shrinks.", "sizeof is implementation-defined and random."],
+      "correct_option": 1,
+      "explanation": "Formal parameters declared as a[4] adjust to int*. sizeof of a pointer (8 on 64-bit) is not the size of the original array."
+    },
+    {
+      "type": "lab",
+      "title": "Find the leak before ASan does",
+      "objective": "Write a heap routine with deliberate unsafety, then fix it and prove it with sanitizers.",
+      "environment": "gcc or clang, any OS; -fsanitize=address for the check.",
+      "instructions": [
+        "Write a function char* make_greeting(const char* name) that mallocs, sprintfs and returns.",
+        "Call it in a loop 1000 times without free — observe growth with top / Task Manager.",
+        "Run with cc -fsanitize=address -g and read the report when you free incorrectly or use-after-free.",
+        "Fix: free after every call and set pointer to NULL after freeing.",
+        "Port the 40-line bump allocator to a free-list allocator sketch and keep ownership notes."
+      ],
+      "hints": ["ASan + UBSan together: -fsanitize=address,undefined. LeakSanitizer runs at exit."],
+      "completion_criteria": ["You can run under ASan with zero reports", "You can describe each pointer's lifetime in one sentence"]
+    }
+  ],
+  "next_lesson_id": null,
+  "review": { "status": "draft", "sources_checked": true }
+}

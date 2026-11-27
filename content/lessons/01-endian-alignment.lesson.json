@@ -1,0 +1,102 @@
+{
+  "schema_version": "1.0",
+  "id": "endian-and-alignment",
+  "title": "Endianness and Alignment",
+  "subtitle": "How bytes sit in memory — and why struct {char; int;} is not 5 bytes.",
+  "course_id": "systems-programming-foundations",
+  "module_id": "01-machine-hardware",
+  "order": 2,
+  "difficulty": "beginner",
+  "estimated_minutes": 30,
+  "summary": "See little vs big endian, network order, and the padding rules that decide struct layout and size.",
+  "learning_objectives": [
+    "Predict memory byte order for a 32-bit integer on little vs big endian.",
+    "Use htonl/ntohl correctly and explain why networking needs it.",
+    "Explain why padding exists, compute sizeof and offsetof, and fix layout with reordering or alignas."
+  ],
+  "prerequisites": ["Memory Hierarchy and Locality"],
+  "tags": ["endianness", "alignment", "c", "networking"],
+  "blocks": [
+    {
+      "type": "callout",
+      "tone": "important",
+      "title": "Memory is just bytes",
+      "markdown": "A `uint32_t 0x01020304` is four bytes. The machine must pick an order to store them. Your laptop (x64, ARM default) picks little-endian: `04 03 02 01` in RAM. The network picks big-endian: `01 02 03 04` on the wire. Every `struct` is this idea plus alignment."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "See it with hex"
+    },
+    {
+      "type": "prose",
+      "markdown": "Write a 4-byte value, dump it with a hex tool or by casting to bytes. The order you see in RAM is the machine's endianness. The value as an integer is the same; the bytes in memory are reversed between the two conventions.\n\nNetworking code always converts with `htonl` / `ntohl` so peers agree. Skipping the call is the classic bug that works on one machine and fails on another."
+    },
+    {
+      "type": "image",
+      "src": "./assets/diagrams/01-endian.svg",
+      "alt": "Diagram showing 0x01020304 stored as 01 02 03 04 on big-endian and 04 03 02 01 on little-endian.",
+      "caption": "Same value, different byte order in memory. Network order is big-endian by definition.",
+      "attribution": "SysProgs original"
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "endian.c",
+      "source": "#include <stdio.h>\n#include <stdint.h>\nint main(void){\n  uint32_t v=0x01020304u;\n  unsigned char *p=(unsigned char*)&v;\n  printf(\"%02x %02x %02x %02x\\n\", p[0],p[1],p[2],p[3]);\n  // portable network order demo (Windows needs Winsock2, POSIX uses arpa/inet.h)\n  return 0;\n}\n",
+      "explanation": "Casts the integer's address to bytes and prints them. On little-endian you see 04 03 02 01; swap the bytes and print again to show the conversion.",
+      "build_command": "cc endian.c -o endian && ./endian",
+      "expected_output": "04 03 02 01 (little-endian); 01 02 03 04 after htonl"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Why struct size surprises you"
+    },
+    {
+      "type": "prose",
+      "markdown": "CPUs prefer aligned access: a 4-byte `int` wants address % 4 == 0, an 8-byte pointer wants % 8. The compiler inserts unnamed padding bytes so every member is aligned. `struct { char a; int b; }` has 1 byte for `a`, 3 bytes of padding, then 4 bytes for `b` → 8 bytes total. Put the big member first and you save the padding.\n\n`sizeof` includes padding. `offsetof` tells you where each member sits. `alignas` forces a stricter alignment (for example 64 to avoid false sharing on a cache line)."
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "padding.c",
+      "source": "#include <stdio.h>\n#include <stddef.h>\nstruct A{ char a; int b; };\nstruct B{ int b; char a; };\nint main(void){\n  printf(\"A %zu pad %zu offset b %zu\\n\", sizeof(struct A), sizeof(struct A)-sizeof(char)-sizeof(int), offsetof(struct A,b));\n  printf(\"B %zu\\n\", sizeof(struct B));\n  return 0;\n}\n",
+      "explanation": "Prints size, padding and offset. Swapping member order shows how layout affects size. Visualise with web/assets diagrams or your own drawings.",
+      "build_command": "cc padding.c -o padding && ./padding",
+      "expected_output": "A 8 ... B 8 (but packing differs; try char; char; int etc.)"
+    },
+    {
+      "type": "resource",
+      "title": "C language — offsetof and alignas",
+      "publisher": "cppreference.com",
+      "url": "https://en.cppreference.com/w/c/types/offsetof",
+      "kind": "reference",
+      "purpose": "Check padding, alignment and offsetof guarantees before trusting folklore."
+    },
+    {
+      "type": "quiz",
+      "question": "On a little-endian machine, struct {char a; int b;} with a=0x11, b=0x01020304 will most likely occupy how many bytes and what byte sequence starts the struct?",
+      "options": ["5 bytes: 11 01 02 03 04", "8 bytes: 11 00 00 00 04 03 02 01", "8 bytes: 11 00 00 00 01 02 03 04", "6 bytes: 11 04 03 02 01"],
+      "correct_option": 1,
+      "explanation": "Padding inserts 3 bytes after a so that b starts at an aligned offset. b itself is stored little-endian: 04 03 02 01."
+    },
+    {
+      "type": "lab",
+      "title": "Shrink a struct",
+      "objective": "Reorder members and measure sizeof / offsetof.",
+      "environment": "C compiler, any OS.",
+      "instructions": [
+        "Create struct D with members char, double, char, int.",
+        "Predict sizeof(D) before running.",
+        "Print sizeof and offsetof for each member.",
+        "Reorder members by descending alignment (double → int → char) and re-measure.",
+        "Try __attribute__((packed)) or #pragma pack(1) and reason why production code rarely uses them."
+      ],
+      "hints": ["double wants 8-byte alignment; char wants 1. Sorting biggest first minimises holes."],
+      "completion_criteria": ["You report original and reordered sizes with an explanation", "You state where padding bytes sit"]
+    }
+  ],
+  "next_lesson_id": "stack-frames-and-calls",
+  "review": { "status": "draft", "sources_checked": true }
+}

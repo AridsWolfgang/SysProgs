@@ -1,0 +1,117 @@
+{
+  "schema_version": "1.0",
+  "id": "toolchain-fundamentals",
+  "title": "Toolchain Fundamentals",
+  "subtitle": "Verify the tools that turn source text into running bytes.",
+  "course_id": "systems-programming-foundations",
+  "module_id": "00-orientation",
+  "order": 2,
+  "difficulty": "beginner",
+  "estimated_minutes": 30,
+  "summary": "Install and verify gcc, g++, nasm, gdb and python, and see exactly what each stage of compilation does.",
+  "learning_objectives": [
+    "Verify gcc, g++, nasm, gdb and python are available and explain what each does.",
+    "Distinguish preprocessing, compilation, assembly and linking using gcc flags.",
+    "Use objdump and nm to inspect a built binary and explain sections."
+  ],
+  "prerequisites": ["From a C Library Call to a System Call"],
+  "tags": ["toolchain", "compilation", "systems-programming", "debugging"],
+  "blocks": [
+    {
+      "type": "callout",
+      "tone": "important",
+      "title": "Why this matters",
+      "markdown": "You cannot debug what you cannot build. Every later module assumes you can go from `hello.c` → `a.exe` → `objdump` without guessing."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "The four stages"
+    },
+    {
+      "type": "prose",
+      "markdown": "A C program does not jump directly to machine code. `gcc -E` shows preprocessor output (headers expanded, macros applied). `gcc -S` emits assembly text. `as` assembles to an object file (`.o` with machine bytes plus relocations). `ld` links objects and libraries into an executable with resolved addresses.\n\nRun each flag once on the same `hello.c` — once you see the intermediate files, the pipeline stops being magic."
+    },
+    {
+      "type": "image",
+      "src": "./assets/diagrams/03-pipeline.svg",
+      "alt": "Diagram showing source file going through preprocessor, compiler, assembler and linker to executable.",
+      "caption": "The classical compilation pipeline. Each arrow is a gcc flag you can run yourself.",
+      "attribution": "SysProgs original — based on classical Unix toolchain"
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "Check your environment"
+    },
+    {
+      "type": "code",
+      "language": "bash",
+      "filename": "check-toolchain.sh",
+      "source": "gcc --version\ng++ --version\nnasm -v\ngdb --version\npython --version\n",
+      "explanation": "Run each version check. On Windows with UCRT64 via MSYS2, gcc should report 12+; with the older mingw32 bundled, 6.3 is enough for modules 00-03 but upgrade for 04+.",
+      "build_command": "sh check-toolchain.sh",
+      "expected_output": "gcc (Rev...) 13.2.0\n..."
+    },
+    {
+      "type": "callout",
+      "tone": "tip",
+      "title": "Windows note",
+      "markdown": "Use UCRT64 (not mingw32) for C++ 17/20, newer GDB, and consistent POSIX shims. `pacman -S mingw-w64-ucrt-x86_64-gcc mingw-w64-ucrt-x86_64-gdb nasm python` keeps the whole curriculum working."
+    },
+    {
+      "type": "heading",
+      "level": 2,
+      "text": "See the stages"
+    },
+    {
+      "type": "code",
+      "language": "c",
+      "filename": "hello.c",
+      "source": "#include <stdio.h>\nint main(void){ printf(\"hi\\n\"); return 0; }\n",
+      "explanation": "Minimal hosted C program. It links against the C library by default; use -nostdlib later in assembly modules to avoid it.",
+      "build_command": "gcc -E hello.c -o hello.i && wc -l hello.i; gcc -S hello.c -o hello.s && head -20 hello.s; gcc -c hello.c -o hello.o && nm hello.o | head",
+      "expected_output": "hello.i has ~800 lines after headers; hello.s shows mov, call, ret; hello.o has T main"
+    },
+    {
+      "type": "resource",
+      "title": "GCC online documentation — Invoking GCC",
+      "publisher": "GNU Project",
+      "url": "https://gcc.gnu.org/onlinedocs/gcc/Invoking-GCC.html",
+      "kind": "official-docs",
+      "purpose": "Reference for -E, -S, -c and linking behaviour."
+    },
+    {
+      "type": "resource",
+      "title": "Binutils — objdump and nm",
+      "publisher": "GNU Project",
+      "url": "https://sourceware.org/binutils/docs/binutils/",
+      "kind": "official-docs",
+      "purpose": "Learn to inspect sections, symbols and disassembly of object files."
+    },
+    {
+      "type": "quiz",
+      "question": "What does gcc -S do without linking?",
+      "options": ["Preprocesses only and stops.", "Emits assembly text and stops.", "Assembles to machine code object (.o) and stops.", "Links into a final executable."],
+      "correct_option": 1,
+      "explanation": "-E stops after preprocessing, -S after compilation to assembly, -c after assembling to an object. Linking is the final ld step."
+    },
+    {
+      "type": "lab",
+      "title": "Trace the build",
+      "objective": "Produce and inspect all intermediate artefacts of a single C file.",
+      "environment": "Any OS with gcc, binutils (objdump/nm) and a text editor.",
+      "instructions": [
+        "Create hello.c as above.",
+        "Run gcc -E, -S, -c and a final link, keeping every output file.",
+        "Compare wc -l of hello.i before and after adding #include <stdio.h>.",
+        "Run objdump -d hello.o and find main's assembly.",
+        "Run nm hello.o and identify which symbol is global (T) vs undefined (U)."
+      ],
+      "hints": ["Use gcc -v hello.c to see the sub-commands gcc actually invokes."],
+      "completion_criteria": ["You have hello.i, hello.s, hello.o and hello.exe", "You can explain which file each flag produced and why headers bloat hello.i"]
+    }
+  ],
+  "next_lesson_id": "memory-hierarchy",
+  "review": { "status": "draft", "sources_checked": true }
+}
