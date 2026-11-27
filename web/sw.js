@@ -1,5 +1,5 @@
 // offline cache — no build step, just static
-const CACHE = "sysprogs-v1";
+const CACHE = "sysprogs-v2";
 const ASSETS = [
   "./",
   "./index.html",
@@ -8,6 +8,10 @@ const ASSETS = [
   "./css/components.css",
   "./css/style.css",
   "./js/app.js",
+  "./js/lesson-renderer.js",
+  "./css/lesson.css",
+  "./lesson.html",
+  "./data/lessons.json",
   "./data/modules.json",
   "./manifest.json",
   "./assets/diagrams/00-syscall-layers.svg"
